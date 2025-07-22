@@ -1,11 +1,25 @@
 import '../css/app.css';
-
+import React from 'react';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
+
+const { useRef } = React;
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+gsap.defaults({
+  duration: 0.34,
+  ease: 'expo4.inOut',
+  overwrite: 'auto', 
+  force3D: true,
+});
 
 createInertiaApp({
     title: (title) => title ? `${title} - ${appName}` : appName,
