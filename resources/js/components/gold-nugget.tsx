@@ -4,7 +4,7 @@ interface NuggetProps {
     className?: string;
 }
 
-export const MarqueeNugget: React.FC<NuggetProps> = ({ className = "" }) => {
+export const GoldNugget: React.FC<NuggetProps> = ({ className = "" }) => {
     return (
         <svg className="size-8" width="41" height="43" viewBox="0 0 41 43" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_261_2606" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="1" y="1" width="39" height="41">
