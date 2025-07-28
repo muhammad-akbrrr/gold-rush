@@ -6,7 +6,7 @@ interface HeroAnimProps {
 }
 
 export const HeroAnim = ({className = ""}: HeroAnimProps) => {
-    const { rive, RiveComponent } = useRive({
+    const { RiveComponent } = useRive({
         src: '/rive/hero.riv',
         stateMachines: "state_machine",
         autoplay: true,

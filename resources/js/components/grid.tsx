@@ -7,7 +7,7 @@ interface GridProps {
     spacing?: number;
 }
 
-const GridComponent = ({ className, variant, spacing }: GridProps) => {
+const GridComponent = ({ className, variant }: GridProps) => {
     const size = 1282;
     const stroke = "var(--border)"
 

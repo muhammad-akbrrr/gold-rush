@@ -17,7 +17,6 @@ export const IntelligenceHub = () => {
     const [activeIndex, setActiveIndex] = useState<number>(0);
 
     const container = useRef<HTMLDivElement>(null);
-    const hoverTween = useRef<gsap.core.Tween | null>(null);
     useGSAP(() => {
         if (activeIndex !== null) {
             const tabs = gsap.utils.toArray<HTMLElement>('img', container.current);
@@ -26,8 +25,6 @@ export const IntelligenceHub = () => {
             gsap.to(tabs[activeIndex], { filter: 'saturate(1)', duration: 0.3 });
         }
     }, [activeIndex, container]);
-
-    const { contextSafe } = useGSAP({ scope: container })
 
     const images = [
         '/images/36523362.png',

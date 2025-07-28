@@ -9,7 +9,7 @@ import { Footer } from '@/components/footer';
 import { Reputation } from '@/components/landing-page/sections/reputation';
 
 export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
+    // const { auth } = usePage<SharedData>().props;
 
     return (
         <>
