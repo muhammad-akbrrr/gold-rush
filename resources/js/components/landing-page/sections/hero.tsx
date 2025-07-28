@@ -1,48 +1,75 @@
+import React, { useRef } from "react";
+
 import { Marquee } from "@/components/magicui/marquee";
 import { Button } from "../button";
-import { HeroGrid } from "../../grid";
+import { Grid } from "../../grid";
 import { HeroTitleSVG } from "./hero/title";
 import { GoldNugget } from "@/components/gold-nugget";
+import { Separator } from "@/components/ui/separator";
+import { HeroAnim } from "./hero/hero-anim";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
+gsap.registerPlugin(ScrollTrigger);
 
 export const HeroSection = () => {
 
+    const container = useRef(null);
+
+    useGSAP(() => {
+        gsap.timeline({
+            scrollTrigger: {
+                trigger: container.current,
+                start: 'bottom bottom',
+                end: 'bottom top',
+                scrub: true,
+                pin: true,
+                pinSpacing: false,
+            }
+        })
+    }, [container])
+
     return (
-        <section className='flex flex-col min-h-svh pt-[80px] relative z-0 overflow-hidden bg-background'>
-            <div className='mx-12 flex-1 grid grid-cols-2'>
-                <div className='flex flex-col gap-4 justify-between pb-6'>
-                    <HeroTitleSVG></HeroTitleSVG>
+        <section className='flex flex-col min-h-svh relative z-0 overflow-hidden bg-background'>
+            <div className='flex-1 flex-col lg:grid lg:grid-cols-2'>
+                <div className='mx-4 lg:ms-12 lg-mx-0 pt-24 flex flex-col gap-4 justify-between pb-6'>
                     <div className='flex flex-col gap-4 text-end'>
-                        <div className='text-large font-bold'>
+                        <HeroTitleSVG />
+                        <div className='text-xl lg:text-2xl font-bold'>
                             There's a World Behind This Door.
                         </div>
                     </div>
                     <div className='flex flex-col gap-4'>
-                        <p className='text-large'>
+                        <p className='max-w-xl text-large lg:text-xl'>
                             The definitive intelligence hub for the modern gold enthusiast. A fusion of live market data, an expert AI historian, and community-driven discovery.
                         </p>
                         <Button className='uppercase'>Explore the hub</Button>
                     </div>
                 </div>
-                <div className=''>
-                    <HeroGrid className={"absolute -z-10 top-0 right-0 max-w-xl h-full"}></HeroGrid>
+                <div className="absolute w-full h-full -z-10 top-0">
+                    <div ref={container} className='w-full h-full overflow-hidden'>
+                        <Grid className={"absolute inset-0 left-1/2 max-w-5xl h-auto"} />
+                        <HeroAnim className="absolute w-full h-full right-0 bottom-0 object-cover" />
+                    </div>
                 </div>
             </div>
-            <div className='w-full max-h-12 bg-slate-950 text-background text-nowrap items-center'>
+            <div className='relative w-full max-h-12 bg-foreground text-background text-nowrap items-center'>
+                <Separator className="absolute top-0 text-background" />
                 <Marquee className="[--duration:20s]" repeat={10}>
                     <div className='flex items-center gap-8'>
                         <span>AI-POWERED INSIGHTS</span>
-                        <GoldNugget></GoldNugget>
+                        <GoldNugget />
                         <span>LIVE MARKET DATA</span>
-                        <GoldNugget></GoldNugget>
+                        <GoldNugget />
                         <span>THE HISTORIAN AI</span>
-                        <GoldNugget></GoldNugget>
+                        <GoldNugget />
                         <span>COMMUNITY DISCOVERY</span>
-                        <GoldNugget></GoldNugget>
+                        <GoldNugget />
                         <span>THE RUSH IS LIVE</span>
-                        <GoldNugget></GoldNugget>
+                        <GoldNugget />
                         <span>STATUS IS EARNED, NOT BOUGHT</span>
-                        <GoldNugget></GoldNugget>
+                        <GoldNugget />
                     </div>
                 </Marquee>
             </div>

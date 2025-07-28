@@ -1,13 +1,12 @@
-import { Button } from '@/components/landing-page/button';
 import { Nav } from '@/components/landing-page/nav';
-import { HeroTitleSVG } from '@/components/landing-page/sections/hero/title';
-import { GoldNugget } from '@/components/gold-nugget';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { HeroGrid } from '@/components/grid';
-import { Marquee } from '@/components/magicui/marquee';
 import { HeroSection } from '@/components/landing-page/sections/hero';
 import { LiveOperation } from '@/components/landing-page/sections/live-operation';
+import { IntelligenceHub } from '@/components/landing-page/sections/intelligence-hub';
+import { Tools } from '@/components/landing-page/sections/tools';
+import { Footer } from '@/components/footer';
+import { Reputation } from '@/components/landing-page/sections/reputation';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -20,9 +19,13 @@ export default function Welcome() {
             </Head>
             <Nav></Nav>
             <main className='bg-white min-h-full text-foreground'>
-                <HeroSection></HeroSection>
-                <LiveOperation></LiveOperation>
+                <HeroSection/>
+                <LiveOperation/>
+                <IntelligenceHub/>
+                <Tools/>
+                <Reputation/>
             </main>
+            <Footer/>
         </>
     );
 }

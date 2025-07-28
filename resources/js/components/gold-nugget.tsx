@@ -1,12 +1,13 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface NuggetProps {
     className?: string;
 }
 
-export const GoldNugget: React.FC<NuggetProps> = ({ className = "" }) => {
+export const GoldNugget = ({className}: NuggetProps) => {
     return (
-        <svg className="size-8" width="41" height="43" viewBox="0 0 41 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className={cn("size-8", className)} width="41" height="43" viewBox="0 0 41 43" fill="none" xmlns="http://www.w3.org/2000/svg">
             <mask id="mask0_261_2606" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="1" y="1" width="39" height="41">
                 <path d="M39.7746 18.425L18.2496 1L1.84961 16.375L10.0496 37.9L34.6496 42L39.7746 18.425Z" fill="#D9D9D9" />
             </mask>
