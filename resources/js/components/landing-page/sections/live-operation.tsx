@@ -83,12 +83,12 @@ export const LiveOperation = () => {
                             <p>We've digitized vast historical archives—maps, journals, and logs too nuanced for AI to decipher alone.</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <span className="text-xl lg:text-xl font-bold uppercase">Analyze the Archives</span>
-                            <p>We've digitized vast historical archives—maps, journals, and logs too nuanced for AI to decipher alone.</p>
+                            <span className="text-xl lg:text-xl font-bold uppercase">Lend Your Intuition</span>
+                            <p>Through 'Collective Sifting', you perform micro-tasks to find the patterns, names, and locations hidden within the noise.</p>
                         </div>
                         <div className="flex flex-col gap-2 mb-12">
-                            <span className="text-xl lg:text-xl font-bold uppercase">Analyze the Archives</span>
-                            <p>We've digitized vast historical archives—maps, journals, and logs too nuanced for AI to decipher alone.</p>
+                            <span className="text-xl lg:text-xl font-bold uppercase">Evolve The Atlas</span>
+                            <p>Every validated discovery directly updates the Living Atlas, revealing new hot zones and guiding the entire community.</p>
                         </div>
                     </div>
                 </div>
