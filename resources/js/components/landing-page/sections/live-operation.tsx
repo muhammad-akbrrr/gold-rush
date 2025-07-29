@@ -7,6 +7,7 @@ import { useRef } from "react";
 import gsap from 'gsap';
 import ScrollTrigger from "gsap/ScrollTrigger";
 import DrawSVGPlugin from "gsap/DrawSVGPlugin";
+import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
@@ -93,7 +94,7 @@ export const LiveOperation = () => {
                     </div>
                 </div>
                 <div ref={container} className="relative col-span-8 bg-foreground p-4 lg:p-24 flex items-center justify-center order-first lg:order-last overflow-hidden">
-                    <Grid variant="small" className="map-grid absolute inset-0 m-auto" />
+                    <InteractiveGridPattern className="map-grid w-full h-full absolute inset-0 m-auto opacity-20" squares={[48, 48]}/>
                     <Map className="map w-full h-auto m-auto" />
                 </div>
             </div>

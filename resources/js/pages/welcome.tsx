@@ -11,6 +11,11 @@ import { Reputation } from '@/components/landing-page/sections/reputation';
 export default function Welcome() {
     // const { auth } = usePage<SharedData>().props;
 
+    const theme = localStorage.getItem("theme");
+    if (!theme) {
+        document.documentElement.classList.remove('dark'); // default to light
+    }
+
     return (
         <>
             <Head title="Gold Rush 2.0">
@@ -19,13 +24,13 @@ export default function Welcome() {
             </Head>
             <Nav></Nav>
             <main className='bg-white min-h-full text-foreground'>
-                <HeroSection/>
-                <LiveOperation/>
-                <IntelligenceHub/>
-                <Tools/>
-                <Reputation/>
+                <HeroSection />
+                <LiveOperation />
+                <IntelligenceHub />
+                <Tools />
+                <Reputation />
             </main>
-            <Footer/>
+            <Footer />
         </>
     );
 }
