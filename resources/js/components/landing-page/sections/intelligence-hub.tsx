@@ -8,7 +8,7 @@ import { Grid } from "@/components/grid";
 
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import HistorianAnim from "./intelligence-hub/historian-anim";
+import HistorianAnim, { HistorianAnimRef } from "./intelligence-hub/historian-anim";
 import { Marquee } from "@/components/magicui/marquee";
 import { PriceTicker } from "./intelligence-hub/price-ticker";
 
@@ -46,7 +46,7 @@ export const IntelligenceHub = () => {
         ]
     }
 
-    const riveRef = useRef<any>(null);
+    const riveRef = useRef<HistorianAnimRef | null>(null);
 
     // GSAP
     const sectionContainer = useRef<HTMLDivElement>(null);

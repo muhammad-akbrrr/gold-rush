@@ -12,7 +12,11 @@ interface HistorianAnimProps {
     className?: string;
 }
 
-const HistorianAnim = forwardRef<HTMLDivElement, HistorianAnimProps>(({ className }, ref) => {
+export interface HistorianAnimRef {
+  fireTrigger: (index: number) => void;
+}
+
+const HistorianAnim = forwardRef<HistorianAnimRef, HistorianAnimProps>(({ className }, ref) => {
     const STATE_MACHINE = 'State Machine 1';
 
     const { rive, RiveComponent } = useRive({
