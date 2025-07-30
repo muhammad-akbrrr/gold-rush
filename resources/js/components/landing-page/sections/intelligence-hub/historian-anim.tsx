@@ -13,7 +13,7 @@ interface HistorianAnimProps {
 }
 
 export interface HistorianAnimRef {
-  fireTrigger: (index: number) => void;
+    fireTrigger: (index: number) => void;
 }
 
 const HistorianAnim = forwardRef<HistorianAnimRef, HistorianAnimProps>(({ className }, ref) => {
@@ -35,12 +35,11 @@ const HistorianAnim = forwardRef<HistorianAnimRef, HistorianAnimProps>(({ classN
 
     useImperativeHandle(ref, () => ({
         fireTrigger: (index: number) => {
-            const triggers = [triggerA, triggerB, triggerC]; // order matters
+            const triggers = [triggerA, triggerB, triggerC];
             const trigger = triggers[index];
             trigger?.fire();
         }
-    } as any
-    ));
+    }));
 
     return <RiveComponent className={cn('', className)} />;
 }
