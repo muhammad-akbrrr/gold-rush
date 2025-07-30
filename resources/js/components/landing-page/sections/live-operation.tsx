@@ -64,7 +64,6 @@ export const LiveOperation = () => {
                 .from('.map .strings path', { autoAlpha: 0, drawSVG: 0}, 0.1)
         }, container)
 
-
         return () => ctx.revert();
     }, { scope: container })
 
