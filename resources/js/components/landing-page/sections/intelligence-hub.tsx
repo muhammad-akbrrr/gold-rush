@@ -72,9 +72,7 @@ export const IntelligenceHub = () => {
             },
             defaults: { ease: 'none' }
         })
-        .add(() => {
-            riveRef.current?.fireTrigger(0)
-        })
+        .add(() => { riveRef.current?.fireTrigger(0) })
 
         tab.forEach((el, index) => {
             el.addEventListener("click", () => {
