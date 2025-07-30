@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 
 import { Marquee } from "@/components/magicui/marquee";
+import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
 import { Button } from "../button";
 import { Grid } from "../../grid";
 import { HeroTitleSVG } from "./hero/title";
@@ -49,7 +50,7 @@ export const HeroSection = () => {
                 </div>
                 <div className="absolute w-full h-full -z-10 top-0">
                     <div ref={container} className='w-full h-full overflow-hidden'>
-                        <Grid className={"absolute inset-0 left-1/2 max-w-5xl h-auto"} />
+                        <InteractiveGridPattern className="absolute inset-0 left-1/2 max-w-5xl h-auto" width={67} height={67} />
                         <HeroAnim className="absolute w-full h-full right-0 bottom-0 object-cover" />
                     </div>
                 </div>

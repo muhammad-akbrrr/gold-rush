@@ -18,7 +18,7 @@ export const HeroAnim = ({className = ""}: HeroAnimProps) => {
 
     return (
         <RiveComponent
-            className={cn("", className)}    
+            className={cn("", className)}
         />
     );
 }
