@@ -1,5 +1,4 @@
 import { BrandLogo } from "../brand-logo";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "../ui/navigation-menu";
 import { Separator } from "../ui/separator";
 import { Button } from "./button";
 

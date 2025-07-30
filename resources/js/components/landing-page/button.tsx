@@ -14,7 +14,14 @@ interface ButtonProps {
     variant?: string;
 }
 
-export const Button = ({ children, onClick, className, variant = "default" }: ButtonProps) => {
+export const Button = (props: ButtonProps) => {
+    
+    const {
+        children,
+        onClick,
+        className,
+        variant = "default",
+    } = props;
 
     const container = useRef<HTMLDivElement>(null);
     const timeline = useRef<gsap.core.Timeline | null>(null);
