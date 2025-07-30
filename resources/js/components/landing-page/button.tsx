@@ -14,42 +14,58 @@ interface ButtonProps {
     variant?: string;
 }
 
-export function Button (props: ButtonProps) {
+export function Button(props: ButtonProps) {
     const { children, onClick, className = "", variant = "default" } = props;
 
     const container = useRef<HTMLDivElement>(null);
     const timeline = useRef<gsap.core.Timeline | null>(null);
     const tween = useRef<gsap.core.Tween | null>(null);
 
+    useGSAP(() => {
+        const btn = container.current?.querySelector('.btn') as HTMLButtonElement;
+        const label = container.current?.querySelector('.label') as HTMLDivElement;
+        const labelPseudo = container.current?.querySelector('.label-pseudo') as HTMLDivElement;
+        const btnBg = container.current?.querySelector('.btn-bg') as HTMLDivElement;
+
+        if (variant === "nav") {
+            const hoverIn = () => {
+                timeline.current = gsap.timeline()
+                    .to(label, { yPercent: -100 })
+                    .to(labelPseudo, { yPercent: -100 }, 0)
+                    .to(btnBg, { scaleY: 1 }, 0)
+                    .to(btn, { borderColor: "var(--background)" }, 0)
+            };
+
+            const hoverOut = () => timeline.current?.reverse();
+
+            btn?.addEventListener('mouseenter', hoverIn);
+            btn?.addEventListener('mouseleave', hoverOut);
+
+            return () => {
+                btn?.removeEventListener('mouseenter', hoverIn);
+                btn?.removeEventListener('mouseleave', hoverOut);
+            };
+        } else {
+            const hoverIn = () => {
+                timeline.current = gsap.timeline().to(btn, { x: 4, y: 4 });
+                tween.current = gsap.to(label, { y: -1, duration: 0.1, delay: 0.35 });
+                tween.current = gsap.to(label, { y: 0, duration: 0.1, delay: 0.4 });
+            };
+
+            const hoverOut = () => timeline.current?.reverse();
+
+            btn?.addEventListener('mouseenter', hoverIn);
+            btn?.addEventListener('mouseleave', hoverOut);
+
+            return () => {
+                btn?.removeEventListener('mouseenter', hoverIn);
+                btn?.removeEventListener('mouseleave', hoverOut);
+            };
+        }
+    }, { scope: container });
+
     switch (variant) {
         case "nav":
-            useGSAP(() => {
-                const btn = container.current?.querySelector('.btn') as HTMLButtonElement;
-                const label = container.current?.querySelector('.label') as HTMLDivElement;
-                const labelPseudo = container.current?.querySelector('.label-pseudo') as HTMLDivElement;
-                const btnBg = container.current?.querySelector('.btn-bg') as HTMLDivElement;
-
-                const hoverIn = () => {
-                    timeline.current = gsap.timeline()
-                        .to(label, { yPercent: -100 })
-                        .to(labelPseudo, { yPercent: -100 }, 0)
-                        .to(btnBg, { scaleY: 1 }, 0)
-                        .to(btn, { borderColor: "var(--background)" }, 0)
-                };
-
-                const hoverOut = () => {
-                    timeline.current?.reverse();
-                };
-
-                btn?.addEventListener('mouseenter', hoverIn);
-                btn?.addEventListener('mouseleave', hoverOut);
-
-                return () => {
-                    btn?.removeEventListener('mouseenter', hoverIn);
-                    btn?.removeEventListener('mouseleave', hoverOut);
-                };
-            }, { scope: container });
-
             return (
                 <div ref={container} className='relative max-w-fit'>
                     <button
@@ -67,30 +83,6 @@ export function Button (props: ButtonProps) {
                 </div>
             )
         default:
-            useGSAP(() => {
-                const btn = container.current?.querySelector('.btn') as HTMLButtonElement;
-                const label = container.current?.querySelector('.label') as HTMLButtonElement;
-
-                const hoverIn = () => {
-                    timeline.current = gsap.timeline()
-                        .to(btn, { x: 4, y: 4 })
-                    tween.current = gsap.to(label, { y: -1, duration: 0.1, delay: 0.35 })
-                    tween.current = gsap.to(label, { y: 0, duration: 0.1, delay: 0.4 })
-                };
-
-                const hoverOut = () => {
-                    timeline.current?.reverse();
-                };
-
-                btn?.addEventListener('mouseenter', hoverIn);
-                btn?.addEventListener('mouseleave', hoverOut);
-
-                return () => {
-                    btn?.removeEventListener('mouseenter', hoverIn);
-                    btn?.removeEventListener('mouseleave', hoverOut);
-                };
-            }, { scope: container });
-
             return (
                 <div ref={container} className='relative max-w-fit'>
                     <div className='btn-bg w-full h-full absolute left-1 top-1 bg-foreground'></div>
