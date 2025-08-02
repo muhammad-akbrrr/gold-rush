@@ -55,15 +55,18 @@ class ProfileController extends Controller
         
         $user = Auth::guard('web3')->user();
 
-        if ($user) {
-            // Delete the user first, then logout and invalidate session
-            $user->delete();
-            Auth::guard('web3')->logout();
+        if (!$user) {
+            abort(401, 'User not authenticated');
         }
 
+        // Logout FIRST while user still exists, then delete
+        Auth::guard('web3')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+        
+        // Now delete the user
+        $user->delete();
+        
         return redirect('/');
     }
 }

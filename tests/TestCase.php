@@ -57,7 +57,7 @@ abstract class TestCase extends BaseTestCase
     {
         return Web3User::factory()->create([
             'is_authenticated' => true,
-            'token_balance' => config('web3.min_token_balance', 100000) + 50000,
+            'token_balance' => 200000, // Well above any reasonable minimum
         ]);
     }
 
