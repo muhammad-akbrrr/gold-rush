@@ -49,11 +49,11 @@ export const CTA = () => {
                     <span className="relative">The frontier is opening</span>
                     <h2 className="relative text-6xl uppercase font-bold mb-6">Join the waitlist</h2>
                     <p className="relative text-xl font-[Lekton]">
-                        Phase 1 is launching soon. The only way in is with $GOLDTOKEN. Join the official waitlist to get mission-critical updates and direct alerts on how to acquire your license to prospect. As a thank you for being early, all waitlist members will be eligible for our Genesis Airdrop of their first Reputation Points (RP) to kickstart their legacy.
+                        Phase 1 is launching soon. The only way in is with $GOLDTOKEN. Join the official waitlist to get mission-critical updates and direct alerts on how to acquire your license to prospect. As a thank you for being early, all waitlist members will be eligible for our Genesis Airdrop of their first Reputation Points (RP) to kickstart their legacy.
                     </p>
                     <div className="space-y-4 mt-8">
-                        <Input />
-                        <Button className="uppercase w-full" variant="cta">CLAIM MY SEAT & FOUNDER'S RP </Button>
+                        <Input placeholder="Enter your email"/>
+                        <Button className="uppercase w-full" variant="cta">CLAIM MY SEAT & FOUNDER'S RP</Button>
                     </div>
                     <Corners position="top left" />
                     <Corners position="top right" />
