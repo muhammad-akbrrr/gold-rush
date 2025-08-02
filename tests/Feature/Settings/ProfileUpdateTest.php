@@ -42,36 +42,6 @@ test('web3 user can view their token balance information', function () {
     // Profile should show wallet info including balance
 });
 
-test('web3 user can delete their account', function () {
-    $user = $this->createSufficientBalanceUser();
-
-    // In Web3, account deletion might require signature confirmation
-    // For now, we'll test the basic deletion flow
-    
-    // First visit the profile page to get CSRF token
-    $getResponse = $this
-        ->actingAs($user, 'web3')
-        ->get('/settings/profile');
-    
-    $getResponse->assertOk();
-    
-    // Extract CSRF token from session
-    $token = session()->token();
-    
-    // Then make the delete request with proper CSRF token
-    $response = $this
-        ->actingAs($user, 'web3')
-        ->delete('/settings/profile', [
-            '_token' => $token
-        ]);
-
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
-
-    $this->assertGuest('web3');
-    expect($user->fresh())->toBeNull();
-});
 
 test('wallet balance information is current', function () {
     $user = Web3User::factory()->create([

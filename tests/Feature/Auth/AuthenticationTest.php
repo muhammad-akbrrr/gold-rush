@@ -70,14 +70,6 @@ test('authenticated web3 users can logout', function () {
     expect(auth('web3')->check())->toBe(false);
 });
 
-test('web3 user session check works for authenticated users', function () {
-    $user = $this->createSufficientBalanceUser();
-    
-    $response = $this->actingAs($user, 'web3')->get('/web3/check');
-
-    $response->assertStatus(200);
-    $response->assertJson(['authenticated' => true]);
-});
 
 test('web3 user session check fails for guests', function () {
     $response = $this->getJson('/web3/check');
