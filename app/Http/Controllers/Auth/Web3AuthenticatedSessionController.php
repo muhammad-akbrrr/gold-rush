@@ -26,10 +26,18 @@ class Web3AuthenticatedSessionController extends Controller
    */
   public function create(): Response
   {
-    return Inertia::render('auth/web3-login', [
-      'tokenInfo' => app('solana')->getTokenInfo(),
-      'networkStatus' => app('solana')->getNetworkStatus(),
-    ]);
+    try {
+      return Inertia::render('auth/login', [
+        'tokenInfo' => app('solana')->getTokenInfo(),
+        'networkStatus' => app('solana')->getNetworkStatus(),
+      ]);
+    } catch (\Exception $e) {
+      // Fallback if solana service has issues
+      return Inertia::render('auth/login', [
+        'tokenInfo' => null,
+        'networkStatus' => null,
+      ]);
+    }
   }
 
   /**
@@ -78,7 +86,7 @@ class Web3AuthenticatedSessionController extends Controller
    */
   public function destroy(Request $request): JsonResponse
   {
-    $this->authService->logout();
+    $this->authService->logoutUser();
 
     $request->session()->invalidate();
     $request->session()->regenerateToken();
