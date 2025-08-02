@@ -29,7 +29,7 @@ export const HeroSection = () => {
                 pinSpacing: false,
             }
         })
-    }, [container])
+    }, { scope: container })
 
     return (
         <section className='flex flex-col min-h-svh relative z-0 overflow-hidden bg-background'>
@@ -42,7 +42,7 @@ export const HeroSection = () => {
                         </div>
                     </div>
                     <div className='flex flex-col gap-4'>
-                        <p className='max-w-xl text-large lg:text-xl'>
+                        <p className='max-w-xl font-[Lekton] text-large lg:text-2xl'>
                             The definitive intelligence hub for the modern gold enthusiast. A fusion of live market data, an expert AI historian, and community-driven discovery.
                         </p>
                         <Button className='uppercase'>Explore the hub</Button>
@@ -50,8 +50,8 @@ export const HeroSection = () => {
                 </div>
                 <div className="absolute w-full h-full -z-10 top-0">
                     <div ref={container} className='w-full h-full overflow-hidden'>
-                        <InteractiveGridPattern className="absolute inset-0 left-1/2 max-w-5xl h-auto" width={67} height={67} />
-                        <HeroAnim className="absolute w-full h-full right-0 bottom-0 object-cover" />
+                        <InteractiveGridPattern className="absolute inset-0 left-1/2 max-w-5xl h-auto" width={64} height={64} />
+                        <HeroAnim className="absolute w-full h-full right-0 bottom-0 object-cover pointer-events-none" />
                     </div>
                 </div>
             </div>
