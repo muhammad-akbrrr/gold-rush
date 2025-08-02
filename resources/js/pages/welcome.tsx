@@ -7,6 +7,7 @@ import { IntelligenceHub } from '@/components/landing-page/sections/intelligence
 import { Tools } from '@/components/landing-page/sections/tools';
 import { Footer } from '@/components/footer';
 import { Reputation } from '@/components/landing-page/sections/reputation';
+import { CTA } from '@/components/landing-page/cta';
 
 export default function Welcome() {
     // const { auth } = usePage<SharedData>().props;
@@ -29,6 +30,7 @@ export default function Welcome() {
                 <IntelligenceHub />
                 <Tools />
                 <Reputation />
+                <CTA />
             </main>
             <Footer />
         </>

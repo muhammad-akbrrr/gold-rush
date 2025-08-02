@@ -78,24 +78,24 @@ export const LiveOperation = () => {
                         <span className="text-large lg:text-xl font-bold">This is where you go from spectator to prospector.</span>
                     </div>
                     <Separator></Separator>
-                    <div className="flex-1 flex flex-col gap-4 justify-between ms-4 lg:ms-12 pe-4 ">
+                    <div className="flex-1 flex flex-col gap-4 justify-between ms-4 lg:ms-12 pe-4 text-xl">
                         <div className="flex flex-col gap-2">
-                            <span className="text-xl lg:text-xl font-bold uppercase">Analyze the Archives</span>
-                            <p>We've digitized vast historical archives—maps, journals, and logs too nuanced for AI to decipher alone.</p>
+                            <span className="lg:text-2xl font-bold uppercase">Analyze the Archives</span>
+                            <p className="font-[Lekton]">We've digitized vast historical archives—maps, journals, and logs too nuanced for AI to decipher alone.</p>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <span className="text-xl lg:text-xl font-bold uppercase">Lend Your Intuition</span>
-                            <p>Through 'Collective Sifting', you perform micro-tasks to find the patterns, names, and locations hidden within the noise.</p>
+                            <span className="lg:text-2xl font-bold uppercase">Lend Your Intuition</span>
+                            <p className="font-[Lekton] ">Through 'Collective Sifting', you perform micro-tasks to find the patterns, names, and locations hidden within the noise.</p>
                         </div>
                         <div className="flex flex-col gap-2 mb-12">
-                            <span className="text-xl lg:text-xl font-bold uppercase">Evolve The Atlas</span>
-                            <p>Every validated discovery directly updates the Living Atlas, revealing new hot zones and guiding the entire community.</p>
+                            <span className="lg:text-2xl font-bold uppercase">Evolve The Atlas</span>
+                            <p className="font-[Lekton] ">Every validated discovery directly updates the Living Atlas, revealing new hot zones and guiding the entire community.</p>
                         </div>
                     </div>
                 </div>
                 <div ref={container} className="relative col-span-8 bg-foreground p-4 lg:p-24 flex items-center justify-center order-first lg:order-last overflow-hidden">
                     <InteractiveGridPattern className="map-grid w-full h-full absolute inset-0 m-auto opacity-20" squares={[48, 48]}/>
-                    <Map className="map w-full h-auto m-auto" />
+                    <Map className="map w-full h-auto m-auto pointer-events-none" />
                 </div>
             </div>
             <Separator></Separator>

@@ -2,6 +2,7 @@ import React from 'react';
 
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { cn } from '@/lib/utils';
 
 gsap.registerPlugin(useGSAP);
 
@@ -78,6 +79,20 @@ export function Button(props: ButtonProps) {
                                 {children}
                             </div>
                             <div className='label-pseudo absolute left-0 right-0 mx-auto top-1/2 translate-y-1/2 text-background'>{children}</div>
+                        </div>
+                    </button>
+                </div>
+            )
+        case "cta":
+            return (
+                <div ref={container} className='relative h-[68px] text-background text-center flex justify-center'>
+                    {/* <div className='absolute inset-0 bg-[#FEFDBF] clip-bevel' /> */}
+                    <div className='absolute inset-0 bg-[#FEFDBF] clip-bevel' />
+                    <div className='absolute inset-[1px] bg-foreground clip-bevel' />
+                    <div className='absolute inset-[1px] bg-linear-to-b from-[#989772]/25 to-[#E1CFAE]/50 clip-bevel shadow-[0_4px_0_rgba(254,253,191,0.25)]'></div>
+                    <button onClick={onClick}>
+                        <div className='label relative p-4 text-shadow-2xl text-shadow-slate-1000'>
+                            {children}
                         </div>
                     </button>
                 </div>

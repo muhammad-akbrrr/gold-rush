@@ -7,7 +7,7 @@ interface MapProps {
 export const Map = ({ className }: MapProps) => {
     return (
         <svg className={cn("", className)} width="1066" height="666" viewBox="0 0 1066 666" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g clip-path="url(#clip0_560_100)">
+            <g clipPath="url(#clip0_560_100)">
                 <g className="dots" filter="url(#filter0_d_560_100)">
                     <path d="M332.28 615.258C332.28 617.126 330.764 618.641 328.896 618.641C327.027 618.641 325.512 617.126 325.512 615.258C325.512 613.39 327.027 611.876 328.896 611.876C330.764 611.876 332.28 613.39 332.28 615.258Z" fill="#FCFEA1" />
                     <path d="M324.03 615.258C324.03 617.126 322.514 618.641 320.646 618.641C318.777 618.641 317.262 617.126 317.262 615.258C317.262 613.39 318.777 611.876 320.646 611.876C322.514 611.876 324.03 613.39 324.03 615.258Z" fill="#FCFEA1" />
@@ -2910,8 +2910,8 @@ export const Map = ({ className }: MapProps) => {
                 <circle cx="245.467" cy="404.613" r="4.45485" transform="rotate(-8.5647 245.467 404.613)" fill="black" />
             </g>
             <defs>
-                <filter id="filter0_d_560_100" x="2.00469" y="16.3759" width="1074.47" height="620.565" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                <filter id="filter0_d_560_100" x="2.00469" y="16.3759" width="1074.47" height="620.565" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
                     <feOffset />
                     <feGaussianBlur stdDeviation="9.15" />
@@ -2920,8 +2920,8 @@ export const Map = ({ className }: MapProps) => {
                     <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_560_100" />
                     <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_560_100" result="shape" />
                 </filter>
-                <filter id="filter1_f_560_100" x="369.66" y="199.006" width="311.184" height="145.548" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                <filter id="filter1_f_560_100" x="369.66" y="199.006" width="311.184" height="145.548" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
                     <feGaussianBlur stdDeviation="2" result="effect1_foregroundBlur_560_100" />
                 </filter>

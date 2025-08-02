@@ -1,14 +1,62 @@
-import { BrandName } from "./brand-name"
-import { Grid } from "./grid"
-import { Separator } from "./ui/separator"
+import { useState, useEffect, useRef } from "react";
+import { BrandName } from "./brand-name";
+import { Grid } from "./grid";
+import { InteractiveGridPattern } from "./magicui/interactive-grid-pattern";
+import { Separator } from "./ui/separator";
+import { useGSAP } from "@gsap/react";
+
+import gsap from "gsap";
 
 export const Footer = () => {
+    const [gridSize, setGridSize] = useState<number>(0);
+
+    useEffect(() => {
+        setGridSize(window.innerWidth / 12)
+    }, [])
+
+    const container = useRef<HTMLDivElement>(null);
+
+    useGSAP(() => {
+        const section = container.current?.querySelector('section');
+        const grid = container.current?.querySelector('.grid') || null;
+        const titleWrap = container.current?.querySelector('.title-wrap') || null;
+        const title = container.current?.querySelector('.title') || null;
+
+        gsap.timeline({
+            scrollTrigger: {
+                trigger: section,
+                start: 'top bottom',
+                end: 'bottom bottom',
+                scrub: true
+            },
+            defaults: { ease: 'none' }
+        })
+            .from(grid, { yPercent: -150 })
+
+        gsap.timeline({
+            scrollTrigger: {
+                trigger: titleWrap,
+                start: 'top bottom',
+                end: 'bottom top',
+                // toggleActions: 'play none none reverse',
+                scrub: true
+            },
+            defaults: { duration: 1 }
+        })
+            .from(titleWrap, { height: 0 })
+            .from(title, { yPercent: -100, duration: 1 }, 0)
+
+    }, { scope: container })
+
     return (
-        <footer className="relative flex flex-col justify-between min-h-screen overflow-hidden text-muted-foreground">
-            <Grid className="absolute inset-0 m-auto w-full h-auto" />
+        <footer ref={container} className="relative flex flex-col justify-between min-h-screen overflow-hidden text-muted-foreground">
+            {/* <Grid className="absolute inset-0 m-auto w-full h-auto" /> */}
+            <InteractiveGridPattern className="grid absolute inset-0 m-auto w-full h-auto" width={gridSize} height={gridSize} />
             <div className="relative flex flex-col gap-4 items-stretch bg-background">
                 <Separator className="mb-24" />
-                <BrandName />
+                <div className="title-wrap overflow-hidden">
+                    <BrandName className="title" />
+                </div>
                 <p className="max-w-xl ms-12 font-bold text-xl">Project Gold Rush is a live, interactive platform for digital discovery.</p>
                 <Separator />
             </div>
