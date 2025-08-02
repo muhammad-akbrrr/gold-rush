@@ -2,7 +2,6 @@ import { Menu } from "lucide-react";
 import { BrandLogo } from "../brand-logo";
 import { Separator } from "../ui/separator";
 import { Button } from "./button";
-
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Nav() {

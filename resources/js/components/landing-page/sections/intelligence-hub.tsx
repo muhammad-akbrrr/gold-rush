@@ -54,7 +54,6 @@ export const IntelligenceHub = () => {
     // GSAP
     const sectionContainer = useRef<HTMLDivElement>(null);
     const riveContainer = useRef<HTMLDivElement>(null);
-
     useGSAP(() => {
         const tab = gsap.utils.toArray<HTMLElement>('.tab', container.current);
 
