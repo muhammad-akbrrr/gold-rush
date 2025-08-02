@@ -196,4 +196,101 @@ class WalletValidationService implements WalletValidationServiceInterface
       'user_agent' => request()->userAgent(),
     ]);
   }
+
+  // Interface implementations
+
+  /**
+   * Validate a wallet address
+   */
+  public function validate(string $walletAddress): array
+  {
+    return $this->validateAddressWithDetails($walletAddress);
+  }
+
+  /**
+   * Check if wallet address is valid
+   */
+  public function isValid(string $walletAddress): bool
+  {
+    $result = $this->validateAddressWithDetails($walletAddress);
+    return $result['is_valid'];
+  }
+
+  /**
+   * Validate address format
+   */
+  public function validateFormat(string $address): bool
+  {
+    return $this->validateSolanaAddress($address);
+  }
+
+  /**
+   * Validate address length
+   */
+  public function validateLength(string $address): bool
+  {
+    $length = strlen($address);
+    return $length >= 32 && $length <= 44;
+  }
+
+  /**
+   * Validate address characters
+   */
+  public function validateCharacters(string $address): bool
+  {
+    return preg_match('/^[1-9A-HJ-NP-Za-km-z]+$/', $address) === 1;
+  }
+
+  /**
+   * Get validation errors for an address
+   */
+  public function getValidationErrors(string $walletAddress): array
+  {
+    $result = $this->validateAddressWithDetails($walletAddress);
+    return $result['errors'] ?? [];
+  }
+
+  /**
+   * Sanitize wallet address input
+   */
+  public function sanitize(string $walletAddress): string
+  {
+    return $this->sanitizeAddress($walletAddress);
+  }
+
+  /**
+   * Check if address is in blacklist
+   */
+  public function isBlacklisted(string $walletAddress): bool
+  {
+    // For now, return false. You can implement blacklist logic here
+    return false;
+  }
+
+  /**
+   * Check if address is in whitelist (if whitelist mode is enabled)
+   */
+  public function isWhitelisted(string $walletAddress): bool
+  {
+    // For now, return true. You can implement whitelist logic here
+    return true;
+  }
+
+  /**
+   * Validate multiple wallet addresses
+   */
+  public function validateMultiple(array $walletAddresses): array
+  {
+    return $this->validateMultipleAddresses($walletAddresses);
+  }
+
+  /**
+   * Get detailed validation result with context
+   */
+  public function validateWithContext(string $walletAddress, array $context = []): array
+  {
+    $result = $this->validateAddressWithDetails($walletAddress);
+    $result['context'] = $context;
+    return $result;
+  }
 }

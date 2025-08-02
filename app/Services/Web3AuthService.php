@@ -23,9 +23,9 @@ class Web3AuthService implements Web3AuthServiceInterface
   }
 
   /**
-   * Authenticate user with wallet address
+   * Authenticate user with wallet address (balance-based authentication)
    */
-  public function authenticate(string $walletAddress, ?string $signature = null, ?string $message = null): ?Web3User
+  public function authenticateWithBalance(string $walletAddress): ?Web3User
   {
     // Rate limiting
     $this->ensureIsNotRateLimited($walletAddress);
@@ -64,7 +64,7 @@ class Web3AuthService implements Web3AuthServiceInterface
     ]));
 
     // Clear rate limit
-    $this->clearRateLimit($walletAddress);
+    $this->clearRateLimitInternal($walletAddress);
 
     return $user;
   }
@@ -81,7 +81,7 @@ class Web3AuthService implements Web3AuthServiceInterface
       ]);
     }
 
-    return $this->authenticate($walletAddress, $signature, $message);
+    return $this->authenticateWithBalance($walletAddress);
   }
 
   /**
@@ -120,9 +120,9 @@ class Web3AuthService implements Web3AuthServiceInterface
   }
 
   /**
-   * Logout user
+   * Logout user (internal method)
    */
-  public function logout(): void
+  public function logoutUser(): void
   {
     $user = Auth::guard('web3')->user();
     
@@ -171,9 +171,9 @@ class Web3AuthService implements Web3AuthServiceInterface
   }
 
   /**
-   * Clear the rate limit for the request
+   * Clear the rate limit for the request (internal method)
    */
-  protected function clearRateLimit(string $walletAddress): void
+  protected function clearRateLimitInternal(string $walletAddress): void
   {
     RateLimiter::clear($this->throttleKey($walletAddress));
   }
@@ -231,5 +231,139 @@ class Web3AuthService implements Web3AuthServiceInterface
     }
 
     return $result;
+  }
+
+  // Interface implementations
+
+  /**
+   * Authenticate user with wallet address and signature (interface method)
+   */
+  public function authenticate(string $walletAddress, string $message, string $signature, ?string $displayName = null): ?Web3User
+  {
+    return $this->authenticateWithSignature($walletAddress, $signature, $message);
+  }
+
+  /**
+   * Login user to the session
+   */
+  public function login(Web3User $user, Request $request): bool
+  {
+    Auth::guard('web3')->login($user);
+    return Auth::guard('web3')->check();
+  }
+
+  /**
+   * Logout user from the session
+   */
+  public function logout(Request $request): bool
+  {
+    $this->logoutUser();
+    return !Auth::guard('web3')->check();
+  }
+
+  /**
+   * Check if user is authenticated
+   */
+  public function isAuthenticated(Request $request): bool
+  {
+    return Auth::guard('web3')->check();
+  }
+
+  /**
+   * Get the authenticated user
+   */
+  public function getAuthenticatedUser(Request $request): ?Web3User
+  {
+    return $this->getCurrentUser();
+  }
+
+  /**
+   * Validate authentication session
+   */
+  public function validateSession(Request $request): bool
+  {
+    $user = Auth::guard('web3')->user();
+    return $user ? $this->validateUserSession($user) : false;
+  }
+
+  /**
+   * Check rate limiting for authentication attempts
+   */
+  public function checkRateLimit(string $walletAddress, string $ipAddress): bool
+  {
+    try {
+      $this->ensureIsNotRateLimited($walletAddress);
+      return true;
+    } catch (ValidationException $e) {
+      return false;
+    }
+  }
+
+  /**
+   * Clear rate limiting for successful authentication
+   */
+  public function clearRateLimit(string $walletAddress, string $ipAddress): void
+  {
+    $this->clearRateLimitInternal($walletAddress);
+  }
+
+  /**
+   * Generate authentication challenge message
+   */
+  public function generateChallengeMessage(string $walletAddress): string
+  {
+    $timestamp = now()->timestamp;
+    $nonce = bin2hex(random_bytes(16));
+    
+    return "Please sign this message to authenticate with your wallet:\n\n" .
+           "Wallet: {$walletAddress}\n" .
+           "Timestamp: {$timestamp}\n" .
+           "Nonce: {$nonce}";
+  }
+
+  /**
+   * Validate challenge message format
+   */
+  public function validateChallengeMessage(string $message): bool
+  {
+    return str_contains($message, 'Please sign this message to authenticate') &&
+           str_contains($message, 'Wallet:') &&
+           str_contains($message, 'Timestamp:') &&
+           str_contains($message, 'Nonce:');
+  }
+
+  /**
+   * Clean up expired sessions
+   */
+  public function cleanupExpiredSessions(): int
+  {
+    // This would typically clean up from a sessions table
+    // For now, return 0 as Laravel handles session cleanup automatically
+    return 0;
+  }
+
+  /**
+   * Get authentication statistics
+   */
+  public function getAuthenticationStatistics(): array
+  {
+    $totalUsers = Web3User::count();
+    $authenticatedUsers = Web3User::where('is_authenticated', true)->count();
+    $recentLogins = Web3User::where('last_balance_check', '>=', now()->subDay())->count();
+    
+    return [
+      'total_users' => $totalUsers,
+      'authenticated_users' => $authenticatedUsers,
+      'recent_logins_24h' => $recentLogins,
+      'authentication_rate' => $totalUsers > 0 ? ($authenticatedUsers / $totalUsers) * 100 : 0,
+    ];
+  }
+
+  /**
+   * Check if user should be logged out due to insufficient balance
+   */
+  public function shouldLogoutDueToBalance(Web3User $user): bool
+  {
+    return !$user->hasSufficientBalance();
   }
 }

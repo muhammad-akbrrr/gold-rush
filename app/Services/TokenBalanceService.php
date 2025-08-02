@@ -107,7 +107,7 @@ class TokenBalanceService implements TokenBalanceServiceInterface
   /**
    * Monitor balance changes and trigger events
    */
-  public function monitorBalanceChanges(Web3User $user): array
+  public function monitorBalanceChangesInternal(Web3User $user): array
   {
     $oldBalance = $user->token_balance;
     $oldAuthenticated = $user->is_authenticated;
@@ -192,5 +192,110 @@ class TokenBalanceService implements TokenBalanceServiceInterface
   {
     $staleUsers = $this->getUsersWithStaleBalances();
     return $this->batchCheckBalances($staleUsers->all());
+  }
+
+  // Interface implementations
+
+  /**
+   * Check balance for multiple users
+   */
+  public function checkMultipleBalances(Collection $users): array
+  {
+    return $this->batchCheckBalances($users->all());
+  }
+
+  /**
+   * Monitor balance changes for a user (interface implementation)
+   */
+  public function monitorBalanceChanges(Web3User $user, ?int $previousBalance = null): array
+  {
+    // Use the existing method but with proper parameter handling
+    if ($previousBalance !== null) {
+      $oldBalance = $previousBalance;
+      $success = $this->checkAndUpdateBalance($user);
+      
+      return [
+        'user_id' => $user->id,
+        'wallet_address' => $user->wallet_address,
+        'previous_balance' => $oldBalance,
+        'current_balance' => $user->token_balance,
+        'balance_changed' => $oldBalance !== $user->token_balance,
+        'success' => $success,
+      ];
+    }
+    
+    // Use existing internal method when no previous balance provided
+    return $this->monitorBalanceChangesInternal($user);
+  }
+
+  /**
+   * Get users with insufficient balance
+   */
+  public function getUsersWithInsufficientBalance(): Collection
+  {
+    $minBalance = config('web3.min_token_balance', 100000);
+    return Web3User::where('token_balance', '<', $minBalance)->get();
+  }
+
+  /**
+   * Get users with stale balance data
+   */
+  public function getUsersWithStaleBalance(int $minutes = 5): Collection
+  {
+    $staleThreshold = now()->subMinutes($minutes);
+    
+    return Web3User::where(function ($query) use ($staleThreshold) {
+      $query->whereNull('last_balance_check')
+        ->orWhere('last_balance_check', '<', $staleThreshold);
+    })->get();
+  }
+
+  /**
+   * Get balance history for user (if tracking is enabled)
+   */
+  public function getBalanceHistory(Web3User $user, int $days = 7): array
+  {
+    // For now, return current balance only
+    // In a real implementation, you would have a balance_history table
+    return [
+      [
+        'date' => $user->last_balance_check?->toDateString() ?? now()->toDateString(),
+        'balance' => $user->token_balance,
+        'timestamp' => $user->last_balance_check?->toISOString() ?? now()->toISOString(),
+      ]
+    ];
+  }
+
+  /**
+   * Check if user's balance is sufficient for operation
+   */
+  public function hasRequiredBalance(Web3User $user, ?int $requiredAmount = null): bool
+  {
+    $required = $requiredAmount ?? $this->getMinimumRequiredBalance();
+    return $user->token_balance >= $required;
+  }
+
+  /**
+   * Get minimum required balance
+   */
+  public function getMinimumRequiredBalance(): int
+  {
+    return config('web3.min_token_balance', 100000);
+  }
+
+  /**
+   * Clean up stale balance cache
+   */
+  public function cleanupStaleCache(): int
+  {
+    $staleUsers = $this->getUsersWithStaleBalance();
+    $count = 0;
+    
+    foreach ($staleUsers as $user) {
+      $this->clearCachedBalance($user->wallet_address);
+      $count++;
+    }
+    
+    return $count;
   }
 }

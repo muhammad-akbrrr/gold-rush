@@ -47,7 +47,7 @@ class Web3ApiController extends Controller
             'wallet_address' => 'required|string',
         ]);
 
-        $result = $this->validationService->validateAddressWithDetails($request->wallet_address);
+        $result = $this->validationService->validate($request->wallet_address);
 
         return response()->json([
             'success' => true,
