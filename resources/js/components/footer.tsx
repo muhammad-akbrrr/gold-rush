@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { BrandName } from "./brand-name";
-import { Grid } from "./grid";
 import { InteractiveGridPattern } from "./magicui/interactive-grid-pattern";
 import { Separator } from "./ui/separator";
 import { useGSAP } from "@gsap/react";

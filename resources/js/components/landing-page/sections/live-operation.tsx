@@ -1,4 +1,3 @@
-import { Grid } from "@/components/grid"
 import { Separator } from "@/components/ui/separator"
 import { Map } from "./live-operation/map"
 

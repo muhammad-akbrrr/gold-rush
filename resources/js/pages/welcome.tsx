@@ -1,5 +1,4 @@
 import { Nav } from '@/components/landing-page/nav';
-import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { HeroSection } from '@/components/landing-page/sections/hero';
 import { LiveOperation } from '@/components/landing-page/sections/live-operation';
