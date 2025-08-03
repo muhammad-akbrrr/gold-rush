@@ -45,20 +45,20 @@ export const CTA = () => {
             </div>
             <div className="relative p-12">
                 <div className="cta-card relative w-full h-full flex flex-col items-stretch gap-2 bg-foreground text-background p-24 overflow-hidden">
+                    <Corners position="top left" />
+                    <Corners position="top right" />
+                    <Corners position="bottom left" />
+                    <Corners position="bottom right" />
                     <InteractiveGridPattern width={gridSize} height={gridSize} className="opacity-15" />
                     <span className="relative">The frontier is opening</span>
                     <h2 className="relative text-6xl uppercase font-bold mb-6">Join the waitlist</h2>
                     <p className="relative text-xl font-[Lekton]">
                         Phase 1 is launching soon. The only way in is with $GOLDTOKEN. Join the official waitlist to get mission-critical updates and direct alerts on how to acquire your license to prospect. As a thank you for being early, all waitlist members will be eligible for our Genesis Airdrop of their first Reputation Points (RP) to kickstart their legacy.
                     </p>
-                    <div className="space-y-4 mt-8">
+                    <div className="relative space-y-4 mt-8">
                         <Input placeholder="Enter your email"/>
                         <Button className="uppercase w-full" variant="cta">CLAIM MY SEAT & FOUNDER'S RP</Button>
                     </div>
-                    <Corners position="top left" />
-                    <Corners position="top right" />
-                    <Corners position="bottom left" />
-                    <Corners position="bottom right" />
                 </div>
             </div>
             <div className="stick relative h-full flex items-end justify-center px-12">

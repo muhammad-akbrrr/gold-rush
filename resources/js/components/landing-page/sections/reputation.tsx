@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { Megaphone } from "./reputation/megaphone";
+import { Lock } from "./reputation/lock";
 
 export const Reputation = () => {
 
@@ -43,7 +45,7 @@ export const Reputation = () => {
                     toggleActions: 'play none none reset'
                 }
             })
-                .from(label, { width: 0, autoAlpha: 0 , delay: .5 })
+                .from(label, { width: 0, autoAlpha: 0, delay: .5 })
         });
     }, { scope: container })
 
@@ -63,7 +65,7 @@ export const Reputation = () => {
             <div className="relative flex flex-col items-stretch gap-8 text-3xl font-bold mx-12 py-12">
                 <div className="bg-line absolute inset-0 m-auto w-[1px] h-[calc(100%-12rem)] bg-[#E3BE5F]"></div>
                 <div className="relative flex flex-col items-center text-center">
-                    <Crest />
+                    <Crest className="size-56" />
                     <div className="flex justify-center gap-4 overflow-hidden">
                         <Separator orientation="vertical" className="bg-[#E3BE5F]" />
                         <div className="label-wrapper bg-background flex flex-col items-center">
@@ -72,8 +74,8 @@ export const Reputation = () => {
                         <Separator orientation="vertical" className="bg-[#E3BE5F]" />
                     </div>
                 </div>
-                <div className="relative flex flex-col self-start items-center text-center">
-                    <Crest />
+                <div className="relative flex flex-col self-start items-center text-center gap-4">
+                    <Megaphone className="size-56" />
                     <div className="flex justify-center gap-4 overflow-hidden">
                         <Separator orientation="vertical" className="bg-[#E3BE5F]" />
                         <div className="label-wrapper bg-background flex flex-col items-center">
@@ -82,8 +84,8 @@ export const Reputation = () => {
                         <Separator orientation="vertical" className="bg-[#E3BE5F]" />
                     </div>
                 </div>
-                <div className="relative flex flex-col self-end items-center text-center">
-                    <Crest />
+                <div className="relative flex flex-col self-end items-center text-center gap-4">
+                    <Lock className="size-56" />
                     <div className="flex justify-center gap-4 overflow-hidden">
                         <Separator orientation="vertical" className="bg-[#E3BE5F]" />
                         <div className="label-wrapper bg-background flex flex-col items-center">
@@ -100,7 +102,7 @@ export const Reputation = () => {
                         </div>
                         <Separator orientation="vertical" className="bg-[#E3BE5F]" />
                     </div>
-                    <Crest variant="gold" />
+                    <Crest variant="gold" className="size-96" />
                 </div>
             </div>
         </section>

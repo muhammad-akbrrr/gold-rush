@@ -40,6 +40,7 @@
         "@radix-ui/react-toggle-group": "^1.1.2",
         "@radix-ui/react-tooltip": "^1.1.8",
         "@rive-app/react-canvas": "^4.22.1",
+        "@rive-app/react-webgl2": "^4.22.1",
         "@tailwindcss/vite": "^4.1.11",
         "@types/react": "^19.0.3",
         "@types/react-dom": "^19.0.2",
