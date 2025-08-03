@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\User;
+use App\Models\Web3User;
 
-test('guests are redirected to the login page', function () {
-    $this->get('/dashboard')->assertRedirect('/login');
+test('guests are redirected to the web3 login page', function () {
+    $this->get('/dashboard')->assertRedirect(route('web3.login'));
 });
 
-test('authenticated users can visit the dashboard', function () {
-    $this->actingAs($user = User::factory()->create());
+test('authenticated web3 users can visit the dashboard', function () {
+    $this->actingAsWeb3User();
 
     $this->get('/dashboard')->assertOk();
 });

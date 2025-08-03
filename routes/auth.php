@@ -1,56 +1,20 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\Web3AuthenticatedSessionController;
+use App\Http\Controllers\Web3ApiController;
 
+// Web3 Authentication Routes
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store']);
-
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
-
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
-
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
-
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
-
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
-
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
+  Route::get('/web3/login', [Web3AuthenticatedSessionController::class, 'create'])->name('web3.login');
+  Route::post('/web3/login', [Web3AuthenticatedSessionController::class, 'store'])->name('web3.login.store');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('verify-email', EmailVerificationPromptController::class)
-        ->name('verification.notice');
-
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
-    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-
-    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
-        ->name('password.confirm');
-
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
-
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
+// Protected Web3 Routes
+Route::middleware('web3.auth')->group(function () {
+  Route::post('/web3/logout', [Web3AuthenticatedSessionController::class, 'destroy'])->name('web3.logout');
+  Route::get('/web3/check', [Web3AuthenticatedSessionController::class, 'check'])->name('web3.check');
+  Route::post('/web3/refresh', [Web3AuthenticatedSessionController::class, 'refresh'])->name('web3.refresh');
+  Route::get('/web3/me', [Web3AuthenticatedSessionController::class, 'me'])->name('web3.me');
 });
+
