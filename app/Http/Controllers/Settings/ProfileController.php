@@ -18,8 +18,10 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = Auth::guard('web3')->user();
+        
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'user' => $user ? $user->only(['id', 'wallet_address', 'display_name', 'token_balance', 'is_authenticated']) : null,
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -27,15 +29,18 @@ class ProfileController extends Controller
     /**
      * Update the user's profile settings.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = Auth::guard('web3')->user();
+        
+        // For Web3 users, we can only update display_name
+        $request->validate([
+            'display_name' => ['nullable', 'string', 'max:255'],
+        ]);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user) {
+            $user->update($request->only(['display_name']));
         }
-
-        $request->user()->save();
 
         return to_route('profile.edit');
     }
@@ -45,19 +50,23 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
+        // For Web3 users, no password validation needed
+        // In a real implementation, you might require wallet signature confirmation
+        
+        $user = Auth::guard('web3')->user();
 
-        $user = $request->user();
+        if (!$user) {
+            abort(401, 'User not authenticated');
+        }
 
-        Auth::logout();
-
-        $user->delete();
-
+        // Logout FIRST while user still exists, then delete
+        Auth::guard('web3')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+        
+        // Now delete the user
+        $user->delete();
+        
         return redirect('/');
     }
 }
