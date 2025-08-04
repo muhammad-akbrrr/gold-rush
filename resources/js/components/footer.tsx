@@ -55,60 +55,60 @@ export const Footer = () => {
             {/* <Grid className="absolute inset-0 m-auto w-full h-auto" /> */}
             <InteractiveGridPattern className="grid absolute inset-0 m-auto w-full h-auto" width={gridSize} height={gridSize} />
             <div className="relative flex flex-col gap-4 items-stretch bg-background">
-                <Separator className="mb-24" />
-                <div className="title-wrap overflow-hidden">
-                    <BrandName className="title" />
+                <Separator className="mb-4 xl:mb-24" />
+                <div className="mx-4 2xl:mx-12 title-wrap overflow-hidden">
+                    <BrandName className="title w-full h-auto" />
                 </div>
-                <p className="desc max-w-xl ms-12 font-bold text-xl">Project Gold Rush is a live, interactive platform for digital discovery.</p>
+                <p className="desc max-w-xl mx-4 xl:ms-12 font-bold text-base xl:text-xl">Project Gold Rush is a live, interactive platform for digital discovery.</p>
                 <Separator />
             </div>
-            <div className="relative grid grid-cols-3 gap-4 bg-background">
+            <div className="relative grid grid-cols-2 md:grid-cols-3 gap-4 bg-background">
                 <Separator className="absolute top-0" />
-                <ul className="space-y-4 py-4 mx-12">
-                    <li className="text-xl font-bold">Resources</li>
+                <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
+                    <li className="text-base xl:text-xl font-bold">Resources</li>
                     <li>
-                        <Link>Litepaper</Link>
+                        <Link className="text-base xl:text-lg">Litepaper</Link>
                     </li>
                     <li>
-                        <Link>Roadmap</Link>
+                        <Link className="text-base xl:text-lg">Roadmap</Link>
                     </li>
                     <li>
-                        <Link>Media Kit</Link>
+                        <Link className="text-base xl:text-lg">Media Kit</Link>
                     </li>
                     <li>
-                        <Link>FAQ</Link>
-                    </li>
-                </ul>
-                <ul className="space-y-4 py-4 mx-12">
-                    <li className="text-xl font-bold">Community</li>
-                    <li>
-                        <Link>Discord</Link>
-                    </li>
-                    <li>
-                        <Link>Twitter (X)</Link>
-                    </li>
-                    <li>
-                        <Link>Telegram</Link>
-                    </li>
-                    <li>
-                        <Link>Medium</Link>
+                        <Link className="text-base xl:text-lg">FAQ</Link>
                     </li>
                 </ul>
-                <ul className="space-y-4 py-4 mx-12">
-                    <li className="text-xl font-bold">Legal</li>
+                <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
+                    <li className="text-base xl:text-xl font-bold">Community</li>
                     <li>
-                        <Link>Privacy Policy</Link>
+                        <Link className="text-base xl:text-lg">Discord</Link>
                     </li>
                     <li>
-                        <Link>Terms and Conditions</Link>
+                        <Link className="text-base xl:text-lg">Twitter (X)</Link>
                     </li>
                     <li>
-                        <Link>Contact Us</Link>
+                        <Link className="text-base xl:text-lg">Telegram</Link>
+                    </li>
+                    <li>
+                        <Link className="text-base xl:text-lg">Medium</Link>
+                    </li>
+                </ul>
+                <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
+                    <li className="text-base xl:text-xl font-bold">Legal</li>
+                    <li>
+                        <Link className="text-base xl:text-lg">Privacy Policy</Link>
+                    </li>
+                    <li>
+                        <Link className="text-base xl:text-lg">Terms and Conditions</Link>
+                    </li>
+                    <li>
+                        <Link className="text-base xl:text-lg">Contact Us</Link>
                     </li>
                 </ul>
                 <Separator className="absolute bottom-0" />
             </div>
-            <div className="relative py-4 bg-background text-center">
+            <div className="relative py-4 bg-background text-center text-sm">
                 <Separator className="absolute top-0" />
                 © 2025 [Your Company Name]. A registered Swiss entity. All rights reserved.
             </div>
