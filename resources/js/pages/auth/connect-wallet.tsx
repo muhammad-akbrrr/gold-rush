@@ -20,27 +20,18 @@ export default function ConnectWallet() {
         disconnect,
         clearError: clearWalletError,
         // Token balance properties
-        balance,
+        balanceFormatted,
         balanceLoading,
         balanceError,
         hasSufficientBalance,
         minRequiredBalanceFormatted,
-        formatBalance,
         refreshBalance,
         clearBalanceError,
         tokenSymbol,
         tokenMintAddress,
     } = useUnifiedWallet();
 
-    const {
-        isAuthenticating,
-        isAuthenticated,
-        user,
-        error: authError,
-        authenticate,
-        checkCanAuthenticate,
-        clearError: clearAuthError,
-    } = useWeb3Auth();
+    const { isAuthenticating, isAuthenticated, error: authError, authenticate, checkCanAuthenticate, clearError: clearAuthError } = useWeb3Auth();
 
     const [connectionStep, setConnectionStep] = useState<'idle' | 'connecting' | 'checking' | 'authenticating' | 'success' | 'error'>('idle');
     const [stepMessage, setStepMessage] = useState<string>('');
@@ -56,6 +47,7 @@ export default function ConnectWallet() {
 
             await connectToWallet(walletType);
 
+            // If we reach here, wallet connection was successful
             if (walletAddress) {
                 setConnectionStep('checking');
                 setStepMessage('Validating wallet address...');
@@ -82,9 +74,11 @@ export default function ConnectWallet() {
                     setStepMessage(canAuthResult.data?.errors?.[0] || 'Wallet cannot authenticate');
                 }
             }
-        } catch (error) {
-            setConnectionStep('error');
-            setStepMessage(error instanceof Error ? error.message : 'Connection failed');
+        } catch {
+            // Reset connection step to idle so "Connecting..." message disappears
+            setConnectionStep('idle');
+            setStepMessage('');
+            // The error will be displayed through the wallet error state
         }
     };
 
@@ -107,6 +101,14 @@ export default function ConnectWallet() {
             setStepMessage('');
         }
     }, [isConnected]);
+
+    // Reset connection step when there's a wallet error
+    useEffect(() => {
+        if (walletError && connectionStep === 'connecting') {
+            setConnectionStep('idle');
+            setStepMessage('');
+        }
+    }, [walletError, connectionStep]);
 
     // Get step icon
     const getStepIcon = () => {
@@ -158,7 +160,7 @@ export default function ConnectWallet() {
             </Head>
 
             <AuthLayout>
-                <Card className="mx-auto w-full max-w-md">
+                <Card className="mx-auto w-full max-w-full">
                     <CardHeader>
                         <h1 className="text-2xl font-bold">Connect Wallet</h1>
                         <p className="text-muted-foreground">Get started by connecting your preferred wallet below.</p>
@@ -279,7 +281,7 @@ export default function ConnectWallet() {
                                         <>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-lg font-bold">
-                                                    {formatBalance(balance ?? 0)} {tokenSymbol}
+                                                    {balanceFormatted} {tokenSymbol}
                                                 </span>
                                                 <Badge variant={hasSufficientBalance ? 'default' : 'destructive'}>
                                                     {hasSufficientBalance ? 'Sufficient' : 'Insufficient'}
@@ -293,21 +295,10 @@ export default function ConnectWallet() {
                                     )}
                                 </div>
 
-                                {/* Authentication Status */}
-                                {isAuthenticated && user && (
-                                    <div className="rounded-lg border bg-green-50 p-4">
-                                        <div className="mb-2 flex items-center gap-2">
-                                            <CheckCircle className="h-4 w-4 text-green-500" />
-                                            <span className="text-sm font-medium text-green-700">Authenticated</span>
-                                        </div>
-                                        <p className="text-sm text-green-600">Welcome back! You're successfully authenticated.</p>
-                                    </div>
-                                )}
-
                                 {/* Action Buttons */}
-                                <div className={`${hasSufficientBalance ? 'grid grid-cols-2 gap-2' : 'flex flex-col items-stretch justify-center'}`}>
+                                <div className="flex flex-row items-center justify-center gap-2">
                                     {!isAuthenticated && hasSufficientBalance && (
-                                        <Button onClick={() => authenticate(walletAddress!)} disabled={isAuthenticating}>
+                                        <Button className="w-full" onClick={() => authenticate(walletAddress!)} disabled={isAuthenticating}>
                                             {isAuthenticating ? (
                                                 <>
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -318,7 +309,7 @@ export default function ConnectWallet() {
                                             )}
                                         </Button>
                                     )}
-                                    <Button variant="outline" onClick={handleDisconnect}>
+                                    <Button className="w-full" variant="outline" onClick={handleDisconnect}>
                                         Disconnect
                                     </Button>
                                 </div>

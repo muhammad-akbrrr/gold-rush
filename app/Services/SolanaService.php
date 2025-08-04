@@ -172,7 +172,7 @@ class SolanaService implements SolanaServiceInterface
   {
     return [
       'mint_address' => $this->tokenMintAddress,
-      'min_balance' => $this->minTokenBalance,
+      'min_balance' => $this->minTokenBalance * pow(10, $this->tokenDecimals),
       'decimals' => $this->tokenDecimals,
       'network' => config('web3.network'),
     ];

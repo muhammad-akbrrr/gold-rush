@@ -37,3 +37,18 @@ test('api route works without csrf', function () {
     // This should not be 419
     expect($response->status())->not->toBe(419);
 });
+
+test('can check authentication eligibility', function () {
+    $this->mockSolanaService();
+
+    $walletAddress = '7rQ1Mn6mF2VQqSqCe88j1Zp12JhZqYzVPu3KzNm4E1tC';
+
+    $response = $this->post('/web3/login/can-authenticate', [
+        'wallet_address' => $walletAddress,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true]);
+    $response->assertJsonPath('data.can_authenticate', true);
+    $response->assertJsonPath('data.has_sufficient_balance', true);
+});

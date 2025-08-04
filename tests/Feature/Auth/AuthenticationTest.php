@@ -16,7 +16,7 @@ test('users can authenticate with valid wallet balance', function () {
     $walletAddress = '7rQ1Mn6mF2VQqSqCe88j1Zp12JhZqYzVPu3KzNm4E1tC';
 
     // Use proper API route
-    $response = $this->post('/web3/can-authenticate', [
+    $response = $this->post('/web3/login/can-authenticate', [
         'wallet_address' => $walletAddress,
     ]);
 
@@ -29,7 +29,7 @@ test('users cannot authenticate with insufficient balance', function () {
 
     $walletAddress = 'InsufficientBalanceWalletAddress';
 
-    $response = $this->post('/web3/can-authenticate', [
+    $response = $this->post('/web3/login/can-authenticate', [
         'wallet_address' => $walletAddress,
     ]);
 
@@ -40,7 +40,7 @@ test('users cannot authenticate with insufficient balance', function () {
 test('users cannot authenticate with invalid wallet address', function () {
     $this->mockSolanaService();
 
-    $response = $this->post('/web3/can-authenticate', [
+    $response = $this->post('/web3/login/can-authenticate', [
         'wallet_address' => 'invalid',
     ]);
 

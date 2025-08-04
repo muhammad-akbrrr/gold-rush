@@ -54,6 +54,7 @@ export interface AuthResult {
 // Balance Types
 export interface BalanceState {
     balance: number | null;
+    balanceFormatted: string;
     isLoading: boolean;
     error: string | null;
     lastUpdated: Date | null;

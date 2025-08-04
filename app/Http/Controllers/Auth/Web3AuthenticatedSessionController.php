@@ -48,8 +48,8 @@ class Web3AuthenticatedSessionController extends Controller
     try {
       $user = $this->authService->authenticate(
         $request->wallet_address,
-        $request->signature,
-        $request->message
+        $request->message,
+        $request->signature
       );
 
       if (!$user) {

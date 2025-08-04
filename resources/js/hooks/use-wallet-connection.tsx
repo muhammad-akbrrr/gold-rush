@@ -47,11 +47,30 @@ export function useWalletConnection() {
                 return;
             }
 
-            await wallet.connect();
+            // Create a timeout promise
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout reached')), 30000); // 30 second timeout
+            });
+
+            // Connect with timeout
+            await Promise.race([wallet.connect(), timeoutPromise]);
         } catch (error) {
+            let errorMessage = 'Failed to connect wallet';
+
+            if (error instanceof Error) {
+                // Handle specific error cases
+                if (error.message.includes('Timeout reached')) {
+                    errorMessage = 'Timeout reached';
+                } else if (error.message.includes('User rejected') || error.message.includes('User denied')) {
+                    errorMessage = 'User rejected connection';
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+
             setState((prev) => ({
                 ...prev,
-                error: error instanceof Error ? error.message : 'Failed to connect wallet',
+                error: errorMessage,
             }));
         } finally {
             setState((prev) => ({ ...prev, isConnecting: false }));
@@ -77,13 +96,38 @@ export function useWalletConnection() {
                     return;
                 }
 
-                // Select and connect to the specific wallet
-                await wallet.select(targetWallet.adapter.name);
-                await wallet.connect();
+                // Create a timeout promise
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Timeout reached')), 30000); // 30 second timeout
+                });
+
+                // Select and connect to the specific wallet with timeout
+                await Promise.race([
+                    (async () => {
+                        await wallet.select(targetWallet.adapter.name);
+                        await wallet.connect();
+                    })(),
+                    timeoutPromise,
+                ]);
             } catch (error) {
+                let errorMessage = `Failed to connect to ${walletName}`;
+
+                if (error instanceof Error) {
+                    // Handle specific error cases
+                    if (error.message.includes('Timeout reached')) {
+                        errorMessage = 'Timeout reached';
+                    } else if (error.message.includes('User rejected') || error.message.includes('User denied')) {
+                        errorMessage = 'User rejected connection';
+                    } else if (error.message.includes('Wallet not found')) {
+                        errorMessage = `${walletName} wallet not found`;
+                    } else {
+                        errorMessage = error.message;
+                    }
+                }
+
                 setState((prev) => ({
                     ...prev,
-                    error: error instanceof Error ? error.message : `Failed to connect to ${walletName}`,
+                    error: errorMessage,
                 }));
             } finally {
                 setState((prev) => ({ ...prev, isConnecting: false }));

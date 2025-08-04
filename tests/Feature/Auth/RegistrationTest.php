@@ -73,3 +73,62 @@ test('wallets with insufficient balance cannot connect', function () {
     // Should return 200 but indicate insufficient balance
     $response->assertStatus(200);
 });
+
+test('can check authentication eligibility for valid wallet', function () {
+    $this->mockSolanaService();
+
+    $walletAddress = '7rQ1Mn6mF2VQqSqCe88j1Zp12JhZqYzVPu3KzNm4E1tC';
+
+    $response = $this->post('/web3/login/can-authenticate', [
+        'wallet_address' => $walletAddress,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true]);
+    $response->assertJsonPath('data.can_authenticate', true);
+    $response->assertJsonPath('data.has_sufficient_balance', true);
+});
+
+test('can check authentication eligibility for insufficient balance wallet', function () {
+    $this->mockSolanaService();
+
+    $walletAddress = 'InsufficientBalanceWalletAddress';
+
+    $response = $this->post('/web3/login/can-authenticate', [
+        'wallet_address' => $walletAddress,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true]);
+    $response->assertJsonPath('data.can_authenticate', false);
+    $response->assertJsonPath('data.has_sufficient_balance', false);
+});
+
+test('can check authentication eligibility for invalid wallet address', function () {
+    $this->mockSolanaService();
+
+    $response = $this->post('/web3/login/can-authenticate', [
+        'wallet_address' => 'invalid-address',
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true]);
+    $response->assertJsonPath('data.can_authenticate', false);
+    $response->assertJsonPath('data.has_sufficient_balance', false);
+    $response->assertJsonPath('data.errors.0', 'Invalid wallet address format.');
+});
+
+test('can check authentication eligibility for non-existent wallet', function () {
+    $this->mockSolanaService();
+
+    $walletAddress = 'NonExistentWalletAddress';
+
+    $response = $this->post('/web3/login/can-authenticate', [
+        'wallet_address' => $walletAddress,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true]);
+    $response->assertJsonPath('data.can_authenticate', false);
+    $response->assertJsonPath('data.has_sufficient_balance', false);
+});

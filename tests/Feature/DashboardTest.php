@@ -2,7 +2,7 @@
 
 use App\Models\Web3User;
 
-test('guests are redirected to the web3 login page', function () {
+test('unauthenticated users are redirected to connect wallet', function () {
     $this->get('/dashboard')->assertRedirect(route('web3.login'));
 });
 

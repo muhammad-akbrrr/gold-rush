@@ -68,13 +68,19 @@ class Web3ApiController extends Controller
 
             // Calculate formatted values for display
             $minBalanceRaw = $tokenInfo['min_balance'];
-            $minBalanceFormatted = number_format($minBalanceRaw, 2);
+            $minBalanceFormatted = number_format($minBalanceRaw / pow(10, $tokenInfo['decimals']), 2);
+
+            // Format the user's balance for display
+            $balanceFormatted = $balance !== null ? number_format($balance / pow(10, $tokenInfo['decimals']), 2) : '0.00';
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'wallet_address' => $walletAddress,
-                    'balance' => $balance,
+                    'balance' => [
+                        'raw' => $balance,
+                        'formatted' => $balanceFormatted,
+                    ],
                     'has_sufficient_balance' => $hasSufficientBalance,
                     'min_required_balance' => [
                         'raw' => $minBalanceRaw,

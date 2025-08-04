@@ -94,7 +94,7 @@ class Web3AuthService implements Web3AuthServiceInterface
       // Dispatch balance logout event
       $minBalance = config('web3.min_token_balance', 100000);
       event(AuthenticationStatusChanged::balanceLogout($user, $user->token_balance, $minBalance));
-      
+
       // Logout user if balance is insufficient
       Auth::guard('web3')->logout();
       return false;
@@ -125,14 +125,14 @@ class Web3AuthService implements Web3AuthServiceInterface
   public function logoutUser(): void
   {
     $user = Auth::guard('web3')->user();
-    
+
     if ($user) {
       // Dispatch logout event
       event(AuthenticationStatusChanged::logout($user, 'user_initiated', [
         'logout_method' => 'manual',
       ]));
     }
-    
+
     Auth::guard('web3')->logout();
   }
 
@@ -237,10 +237,17 @@ class Web3AuthService implements Web3AuthServiceInterface
 
   /**
    * Authenticate user with wallet address and signature (interface method)
+   * If signature and message are not provided, falls back to balance-based authentication
    */
-  public function authenticate(string $walletAddress, string $message, string $signature, ?string $displayName = null): ?Web3User
+  public function authenticate(string $walletAddress, ?string $message = null, ?string $signature = null, ?string $displayName = null): ?Web3User
   {
-    return $this->authenticateWithSignature($walletAddress, $signature, $message);
+    // If signature and message are provided, use signature-based authentication
+    if ($signature && $message) {
+      return $this->authenticateWithSignature($walletAddress, $signature, $message);
+    }
+
+    // Otherwise, use balance-based authentication (no signature required)
+    return $this->authenticateWithBalance($walletAddress);
   }
 
   /**
@@ -314,11 +321,11 @@ class Web3AuthService implements Web3AuthServiceInterface
   {
     $timestamp = now()->timestamp;
     $nonce = bin2hex(random_bytes(16));
-    
+
     return "Please sign this message to authenticate with your wallet:\n\n" .
-           "Wallet: {$walletAddress}\n" .
-           "Timestamp: {$timestamp}\n" .
-           "Nonce: {$nonce}";
+      "Wallet: {$walletAddress}\n" .
+      "Timestamp: {$timestamp}\n" .
+      "Nonce: {$nonce}";
   }
 
   /**
@@ -327,9 +334,9 @@ class Web3AuthService implements Web3AuthServiceInterface
   public function validateChallengeMessage(string $message): bool
   {
     return str_contains($message, 'Please sign this message to authenticate') &&
-           str_contains($message, 'Wallet:') &&
-           str_contains($message, 'Timestamp:') &&
-           str_contains($message, 'Nonce:');
+      str_contains($message, 'Wallet:') &&
+      str_contains($message, 'Timestamp:') &&
+      str_contains($message, 'Nonce:');
   }
 
   /**
@@ -350,7 +357,7 @@ class Web3AuthService implements Web3AuthServiceInterface
     $totalUsers = Web3User::count();
     $authenticatedUsers = Web3User::where('is_authenticated', true)->count();
     $recentLogins = Web3User::where('last_balance_check', '>=', now()->subDay())->count();
-    
+
     return [
       'total_users' => $totalUsers,
       'authenticated_users' => $authenticatedUsers,

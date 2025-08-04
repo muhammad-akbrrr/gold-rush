@@ -9,6 +9,7 @@ interface UseTokenBalanceProps {
 export function useTokenBalance({ walletAddress, isConnected }: UseTokenBalanceProps) {
     const [state, setState] = useState<BalanceState>({
         balance: null,
+        balanceFormatted: '0.00',
         isLoading: false,
         error: null,
         lastUpdated: null,
@@ -91,7 +92,8 @@ export function useTokenBalance({ walletAddress, isConnected }: UseTokenBalanceP
 
             setState((prev) => ({
                 ...prev,
-                balance: balance,
+                balance: balance.raw,
+                balanceFormatted: balance.formatted,
                 isLoading: false,
                 lastUpdated: new Date(),
                 hasSufficientBalance: has_sufficient_balance,
@@ -102,7 +104,7 @@ export function useTokenBalance({ walletAddress, isConnected }: UseTokenBalanceP
                 tokenDecimals: token_decimals,
             }));
 
-            return balance;
+            return balance.raw;
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to fetch balance';
             setState((prev) => ({
@@ -126,23 +128,6 @@ export function useTokenBalance({ walletAddress, isConnected }: UseTokenBalanceP
             return balance >= state.minRequiredBalance;
         },
         [state.minRequiredBalance],
-    );
-
-    // Format balance for display
-    const formatBalance = useCallback(
-        (balance: number | null): string => {
-            if (balance === null) return '0';
-
-            // Convert from smallest unit to display unit using the correct decimals
-            const displayBalance = balance / Math.pow(10, state.tokenDecimals);
-            const formatted = displayBalance.toLocaleString('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-            });
-
-            return formatted;
-        },
-        [state.tokenDecimals],
     );
 
     // Clear error
@@ -173,7 +158,6 @@ export function useTokenBalance({ walletAddress, isConnected }: UseTokenBalanceP
         fetchBalance,
         refreshBalance,
         checkSufficientBalance,
-        formatBalance,
         clearError,
     };
 }

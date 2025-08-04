@@ -13,7 +13,7 @@ export function Nav() {
                 <BrandLogo />
                 {useIsMobile() ? (
                     <>
-                        <Button variant="nav" onClick={() => router.visit(route('connect-wallet'))}>
+                        <Button variant="nav" onClick={() => router.visit(route('web3.login'))}>
                             <Menu />
                         </Button>
                     </>
@@ -27,8 +27,8 @@ export function Nav() {
                                 <Link className="text-lg">Litepaper</Link>
                             </li>
                         </ul>
-                        <Button variant="nav" onClick={() => router.visit(route('connect-wallet'))}>
-                            CONNECT YOUR WALLET
+                        <Button variant="nav" onClick={() => router.visit(route('web3.login'))}>
+                            Connect Wallet
                         </Button>
                     </>
                 )}

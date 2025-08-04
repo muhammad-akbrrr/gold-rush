@@ -3,16 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Web3ApiController;
-use App\Http\Controllers\Auth\Web3AuthenticatedSessionController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
-
-// Connect Wallet Route
-Route::get('/connect-wallet', function () {
-    return Inertia::render('auth/connect-wallet');
-})->name('connect-wallet');
 
 // Public Web3 API Routes (no authentication required)
 Route::prefix('web3')->group(function () {
@@ -20,7 +14,6 @@ Route::prefix('web3')->group(function () {
     Route::get('/network-status', [Web3ApiController::class, 'getNetworkStatus'])->name('web3.network-status');
     Route::post('/validate-wallet', [Web3ApiController::class, 'validateWallet'])->name('web3.validate-wallet');
     Route::post('/wallet-balance', [Web3ApiController::class, 'getWalletBalance'])->name('web3.wallet-balance');
-    Route::post('/can-authenticate', [Web3AuthenticatedSessionController::class, 'canAuthenticate'])->name('web3.can-authenticate');
 });
 
 Route::middleware('web3.auth')->group(function () {

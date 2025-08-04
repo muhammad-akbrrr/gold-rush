@@ -106,16 +106,17 @@ export function useUnifiedWallet() {
 
         // Token balance properties
         balance: tokenBalance.balance,
+        balanceFormatted: tokenBalance.balanceFormatted,
         balanceLoading: tokenBalance.isLoading,
         balanceError: tokenBalance.error,
         hasSufficientBalance: tokenBalance.hasSufficientBalance,
         minRequiredBalance: tokenBalance.minRequiredBalance,
         minRequiredBalanceFormatted: tokenBalance.minRequiredBalanceFormatted,
-        formatBalance: tokenBalance.formatBalance,
         refreshBalance: tokenBalance.refreshBalance,
         clearBalanceError: tokenBalance.clearError,
         tokenSymbol: tokenBalance.tokenSymbol,
         tokenMintAddress: tokenBalance.tokenMintAddress,
+        tokenDecimals: tokenBalance.tokenDecimals,
 
         // Individual wallet hooks for specific functionality
         solanaWallet,

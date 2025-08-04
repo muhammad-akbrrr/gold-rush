@@ -18,7 +18,7 @@ export function useWeb3Auth() {
     // Check if wallet can authenticate (pre-authentication check)
     const checkCanAuthenticate = useCallback(async (address: string): Promise<AuthResult> => {
         try {
-            const response = await fetch('/web3/can-authenticate', {
+            const response = await fetch('/web3/login/can-authenticate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -95,13 +95,13 @@ export function useWeb3Auth() {
             } else {
                 setState((prev) => ({
                     ...prev,
-                    error: data.message || 'Authentication failed',
+                    error: 'Authentication failed. Please try again',
                 }));
             }
 
             return data;
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+        } catch {
+            const errorMessage = 'Authentication failed. Please try again';
             setState((prev) => ({ ...prev, error: errorMessage }));
             return { success: false, message: errorMessage };
         } finally {
@@ -145,7 +145,7 @@ export function useWeb3Auth() {
                 hasSufficientBalance: false,
             }));
 
-            router.visit(route('connect-wallet'));
+            router.visit(route('web3.login'));
         } catch (error) {
             console.error('Logout failed:', error);
         }

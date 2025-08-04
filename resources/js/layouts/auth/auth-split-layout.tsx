@@ -27,7 +27,7 @@ export default function AuthSplitLayout({ children }: PropsWithChildren) {
                 )}
             </div>
             <div className="w-full lg:p-8">
-                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[480px]">{children}</div>
+                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[512px]">{children}</div>
             </div>
         </div>
     );
