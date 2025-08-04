@@ -48,11 +48,11 @@ export const Trust = () => {
     return (
         <section ref={container} className="h-[150svh] w-full flex flex-col items-center bg-background overflow-hidden text-muted-foreground">
             <Separator className="grow-0" />
-            <h2 className="mx-12 text-9xl font-bold text-center uppercase my-4">
+            <h2 className="mx-4 md:mx-12 text-3xl xl:text-8xl 2xl:text-9xl font-bold text-center uppercase my-4">
                 Built on a foundation of trust
             </h2>
             <Separator className="grow-0" />
-            <div className="relative h-full w-full px-12 pt-12 overflow-hidden">
+            <div className="relative h-full w-full px-4 md:px-12 pt-12 overflow-hidden">
                 <InteractiveGridPattern width={gridSize} height={gridSize} />
                 <TrustAnim data-gsap="trust-anim" className="absolute w-full h-[50svh] max-h-11/12 -translate-x-[2.1%]" />
             </div>

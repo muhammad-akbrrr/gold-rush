@@ -77,7 +77,7 @@ export const LiveOperation = () => {
                         <span className="text-large lg:text-xl font-bold">This is where you go from spectator to prospector.</span>
                     </div>
                     <Separator></Separator>
-                    <div className="flex-1 flex flex-col gap-4 justify-between ms-4 lg:ms-12 pe-4 text-xl">
+                    <div className="flex-1 flex flex-col gap-4 justify-between ms-4 lg:ms-12 pe-4 text-base xl:text-xl">
                         <div className="flex flex-col gap-2">
                             <span className="lg:text-2xl font-bold uppercase">Analyze the Archives</span>
                             <p className="font-[Lekton]">We've digitized vast historical archives—maps, journals, and logs too nuanced for AI to decipher alone.</p>

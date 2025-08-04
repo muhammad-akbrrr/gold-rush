@@ -4,16 +4,17 @@ import { Separator } from "../ui/separator";
 import { Button } from "./button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link } from "../link";
+import { router } from '@inertiajs/react';
 
 export function Nav() {
     return (
-        <nav className="min-w-screen flex justify-center bg-foreground text-background fixed z-50 py-1">
+        <nav className="min-w-screen flex justify-center bg-foreground text-background fixed z-50 py-2">
             <div className="w-full mx-12 flex justify-between items-center">
                 <BrandLogo />
                 {
                     useIsMobile() ?
                         <>
-                            <Button variant="nav"><Menu/></Button>
+                            <Button variant="nav" onClick={() => router.visit('/')}><Menu/></Button>
                         </>
                         :
                         <>
