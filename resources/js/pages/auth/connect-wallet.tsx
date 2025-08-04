@@ -19,7 +19,6 @@ export default function ConnectWallet() {
         connectToWallet,
         disconnect,
         clearError: clearWalletError,
-        // Token balance properties
         balanceFormatted,
         balanceLoading,
         balanceError,
