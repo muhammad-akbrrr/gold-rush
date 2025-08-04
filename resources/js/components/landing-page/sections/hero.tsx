@@ -31,7 +31,7 @@ export const HeroSection = () => {
     }, { scope: container })
 
     return (
-        <section className='flex flex-col min-h-svh relative z-0 overflow-hidden bg-background'>
+        <section className='flex flex-col min-h-svh relative z-0 overflow-hidden bg-background text-muted-foreground'>
             <div className='flex-1 flex-col lg:grid lg:grid-cols-2'>
                 <div className='mx-4 lg:ms-12 lg-mx-0 pt-24 flex flex-col gap-4 justify-between pb-6'>
                     <div className='flex flex-col gap-4 text-end'>

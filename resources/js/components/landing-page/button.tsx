@@ -50,7 +50,7 @@ export function Button(props: ButtonProps) {
                 timeline.current = gsap.timeline()
                     .to(btnBg, { scaleY: 1, autoAlpha: 1, duration: 1 })
                     .to(label, { yPercent: -100 }, 0)
-                    .fromTo(labelPseudo, { yPercent: 100 }, { yPercent: -50 }, 0)
+                    .to(labelPseudo, { yPercent: -100 }, 0)
             };
 
             const hoverOut = () => timeline.current?.reverse();
@@ -119,7 +119,7 @@ export function Button(props: ButtonProps) {
                             <div data-gsap="label" className='relative text-shadow-2xl text-shadow-slate-1000'>
                                 {children}
                             </div>
-                            <div data-gsap="label-pseudo" className='absolute w-full left-1/2 top-1/2 -translate-x-1/2 text-shadow-2xl text-shadow-slate-1000'>
+                            <div data-gsap="label-pseudo" className='absolute w-full inset-0 m-auto translate-y-full text-shadow-2xl text-shadow-slate-1000'>
                                 {children}
                             </div>
                         </div>

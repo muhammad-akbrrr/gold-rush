@@ -2,11 +2,12 @@ import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
     className?: string;
+    onClick?: () => void;
 }
 
-export const BrandLogo = ({ className }: BrandLogoProps) => {
+export const BrandLogo = ({ className, onClick }: BrandLogoProps) => {
     return (
-        <svg className={cn("w-8", className)} width="53" height="50" viewBox="0 0 53 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className={cn("size-8 cursor-pointer", className)} viewBox="0 0 53 50" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={onClick}>
             <path d="M24.9296 18.0791C39.2496 15.1837 51.3667 15.3487 51.994 18.4482C52.3666 20.2907 48.5951 22.7545 42.4677 25.0586C42.5846 28.0453 42.5565 30.4202 42.5448 31.5C42.496 38 38.9959 49.4999 26.5448 49.5C17.496 49.5 10.0029 42 9.9999 32.5C9.9999 32.1219 10.0016 31.7429 10.0048 31.3633C4.2797 31.4496 0.478841 30.6347 0.134662 28.9346C-0.49211 25.8347 10.6091 20.9746 24.9296 18.0791Z" fill="var(--background)" />
             <path d="M31.5448 0C37.4942 8.77237e-05 40.2427 7.28855 41.5048 14.9229C39.6036 13.9682 34.835 12.1963 25.9999 12.5C21.0028 12.6718 14.1222 14.9892 11.2938 16.0166C11.3584 15.6744 11.4257 15.3354 11.496 15C13.1792 6.97373 15.996 1 18.5448 1C21.0935 1.00004 20.996 2.5 23.996 2.5C26.9959 2.49994 27.5937 -1.87752e-06 31.5448 0Z" fill="var(--background)" />
             <path d="M25.5 45C36 45 37 35.5 37 35.5C37 35.5 33 37 25.5 37C18 37 14 35.5 14 35.5C14 35.5 15 45 25.5 45Z" fill="var(--foreground)" />
