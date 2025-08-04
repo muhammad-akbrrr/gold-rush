@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Log;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
@@ -28,15 +27,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'web3.auth' => Web3AuthMiddleware::class,
         ]);
 
+        // Exclude Web3 routes from CSRF protection (like API routes)
+        $middleware->validateCsrfTokens(except: [
+            'web3/*',
+        ]);
+
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-        ]);
-
-        // Add session middleware to API routes for authentication endpoints
-        $middleware->api(prepend: [
-            \Illuminate\Session\Middleware\StartSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

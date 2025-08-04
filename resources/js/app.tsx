@@ -1,14 +1,14 @@
-import '../css/app.css';
-import React from 'react';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
+import '../css/app.css';
+import { Web3Provider } from './contexts/Web3Context';
 import { initializeTheme } from './hooks/use-appearance';
 
-import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import Lenis from 'lenis';
+import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
 
 gsap.registerPlugin(useGSAP);
 
@@ -32,12 +32,16 @@ gsap.ticker.lagSmoothing(0);
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => title ? `${title} - ${appName}` : appName,
+    title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <Web3Provider>
+                <App {...props} />
+            </Web3Provider>,
+        );
     },
     progress: {
         color: '#4B5563',

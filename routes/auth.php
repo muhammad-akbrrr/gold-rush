@@ -16,5 +16,9 @@ Route::middleware('web3.auth')->group(function () {
   Route::get('/web3/check', [Web3AuthenticatedSessionController::class, 'check'])->name('web3.check');
   Route::post('/web3/refresh', [Web3AuthenticatedSessionController::class, 'refresh'])->name('web3.refresh');
   Route::get('/web3/me', [Web3AuthenticatedSessionController::class, 'me'])->name('web3.me');
+
+  // Protected Web3 API Routes (authentication required)
+  Route::get('/web3/balance-stats', [Web3ApiController::class, 'getBalanceStats'])->name('web3.balance-stats');
+  Route::post('/web3/refresh-balance', [Web3ApiController::class, 'refreshBalance'])->name('web3.refresh-balance');
 });
 

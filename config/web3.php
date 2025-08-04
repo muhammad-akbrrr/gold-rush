@@ -77,9 +77,7 @@ return [
     'supported_wallets' => [
       'phantom',
       'solflare',
-      'backpack',
-      'slope',
-      'exodus',
+      'metamask',
     ],
   ],
 

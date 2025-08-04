@@ -1,18 +1,18 @@
-import { Nav } from '@/components/landing-page/nav';
-import { Head, usePage } from '@inertiajs/react';
-import { HeroSection } from '@/components/landing-page/sections/hero';
-import { LiveOperation } from '@/components/landing-page/sections/live-operation';
-import { IntelligenceHub } from '@/components/landing-page/sections/intelligence-hub';
-import { Tools } from '@/components/landing-page/sections/tools';
 import { Footer } from '@/components/footer';
-import { Reputation } from '@/components/landing-page/sections/reputation';
 import { CTA } from '@/components/landing-page/cta';
+import { Nav } from '@/components/landing-page/nav';
+import { HeroSection } from '@/components/landing-page/sections/hero';
+import { IntelligenceHub } from '@/components/landing-page/sections/intelligence-hub';
+import { LiveOperation } from '@/components/landing-page/sections/live-operation';
+import { Reputation } from '@/components/landing-page/sections/reputation';
+import { Tools } from '@/components/landing-page/sections/tools';
 import { Trust } from '@/components/landing-page/trust';
+import { Head } from '@inertiajs/react';
 
 export default function Welcome() {
     // const { auth } = usePage<SharedData>().props;
 
-    const theme = localStorage.getItem("theme");
+    const theme = localStorage.getItem('theme');
     if (!theme) {
         document.documentElement.classList.remove('dark'); // default to light
     }
@@ -24,7 +24,7 @@ export default function Welcome() {
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
             <Nav></Nav>
-            <main className='bg-white min-h-full text-foreground'>
+            <main className="min-h-full bg-white text-foreground">
                 <HeroSection />
                 <LiveOperation />
                 <IntelligenceHub />
