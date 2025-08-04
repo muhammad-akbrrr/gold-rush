@@ -3,7 +3,6 @@ import React, { useRef } from "react";
 import { Marquee } from "@/components/magicui/marquee";
 import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
 import { Button } from "../button";
-import { Grid } from "../../grid";
 import { HeroTitleSVG } from "./hero/title";
 import { GoldNugget } from "@/components/gold-nugget";
 import { Separator } from "@/components/ui/separator";

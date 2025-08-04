@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { BrandName } from "./brand-name";
-import { Grid } from "./grid";
 import { InteractiveGridPattern } from "./magicui/interactive-grid-pattern";
 import { Separator } from "./ui/separator";
 import { useGSAP } from "@gsap/react";
 
 import gsap from "gsap";
+import { Link } from "./link";
 
 export const Footer = () => {
     const [gridSize, setGridSize] = useState<number>(0);
@@ -21,6 +21,7 @@ export const Footer = () => {
         const grid = container.current?.querySelector('.grid') || null;
         const titleWrap = container.current?.querySelector('.title-wrap') || null;
         const title = container.current?.querySelector('.title') || null;
+        const desc = container.current?.querySelector('.desc') || null;
 
         gsap.timeline({
             scrollTrigger: {
@@ -45,6 +46,7 @@ export const Footer = () => {
         })
             .from(titleWrap, { height: 0 })
             .from(title, { yPercent: -100, duration: 1 }, 0)
+            .from(desc, { autoAlpha: 0, duration: 1 }, 0)
 
     }, { scope: container })
 
@@ -57,7 +59,7 @@ export const Footer = () => {
                 <div className="title-wrap overflow-hidden">
                     <BrandName className="title" />
                 </div>
-                <p className="max-w-xl ms-12 font-bold text-xl">Project Gold Rush is a live, interactive platform for digital discovery.</p>
+                <p className="desc max-w-xl ms-12 font-bold text-xl">Project Gold Rush is a live, interactive platform for digital discovery.</p>
                 <Separator />
             </div>
             <div className="relative grid grid-cols-3 gap-4 bg-background">
@@ -65,43 +67,43 @@ export const Footer = () => {
                 <ul className="space-y-4 py-4 mx-12">
                     <li className="text-xl font-bold">Resources</li>
                     <li>
-                        <a className="text-lg cursor-pointer">Litepaper</a>
+                        <Link>Litepaper</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">Roadmap</a>
+                        <Link>Roadmap</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">Media Kit</a>
+                        <Link>Media Kit</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">FAQ</a>
+                        <Link>FAQ</Link>
                     </li>
                 </ul>
                 <ul className="space-y-4 py-4 mx-12">
                     <li className="text-xl font-bold">Community</li>
                     <li>
-                        <a className="text-lg cursor-pointer">Discord</a>
+                        <Link>Discord</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">Twitter (X)</a>
+                        <Link>Twitter (X)</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">Telegram</a>
+                        <Link>Telegram</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">Medium</a>
+                        <Link>Medium</Link>
                     </li>
                 </ul>
                 <ul className="space-y-4 py-4 mx-12">
                     <li className="text-xl font-bold">Legal</li>
                     <li>
-                        <a className="text-lg cursor-pointer">Privacy Policy</a>
+                        <Link>Privacy Policy</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">Terms and Conditions</a>
+                        <Link>Terms and Conditions</Link>
                     </li>
                     <li>
-                        <a className="text-lg cursor-pointer">Contact Us</a>
+                        <Link>Contact Us</Link>
                     </li>
                 </ul>
                 <Separator className="absolute bottom-0" />

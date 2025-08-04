@@ -3,6 +3,7 @@ import { BrandLogo } from "../brand-logo";
 import { Separator } from "../ui/separator";
 import { Button } from "./button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "../link";
 
 export function Nav() {
     return (
@@ -16,12 +17,12 @@ export function Nav() {
                         </>
                         :
                         <>
-                            <ul className="flex flex-1 gap-8 justify-around items-center">
+                            <ul className="flex flex-1 gap-8 justify-around items-center text-lg">
                                 <li>
-                                    <a className="text-lg">About</a>
+                                    <Link className="text-background">About</Link>
                                 </li>
                                 <li>
-                                    <a className="text-lg">Litepaper</a>
+                                    <Link className="text-background">Resources</Link>
                                 </li>
                             </ul>
                             <Button variant="nav">CONNECT YOUR WALLET</Button>

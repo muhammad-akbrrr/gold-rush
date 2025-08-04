@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { Separator } from "@/components/ui/separator"
 import { Hq } from "./intelligence-hub/hq";
-import { Grid } from "@/components/grid";
 
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';

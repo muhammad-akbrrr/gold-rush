@@ -1,5 +1,4 @@
 import { Nav } from '@/components/landing-page/nav';
-import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { HeroSection } from '@/components/landing-page/sections/hero';
 import { LiveOperation } from '@/components/landing-page/sections/live-operation';
@@ -8,6 +7,7 @@ import { Tools } from '@/components/landing-page/sections/tools';
 import { Footer } from '@/components/footer';
 import { Reputation } from '@/components/landing-page/sections/reputation';
 import { CTA } from '@/components/landing-page/cta';
+import { Trust } from '@/components/landing-page/trust';
 
 export default function Welcome() {
     // const { auth } = usePage<SharedData>().props;
@@ -30,6 +30,7 @@ export default function Welcome() {
                 <IntelligenceHub />
                 <Tools />
                 <Reputation />
+                <Trust />
                 <CTA />
             </main>
             <Footer />

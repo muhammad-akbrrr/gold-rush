@@ -16,17 +16,16 @@ interface ButtonProps {
 }
 
 export function Button(props: ButtonProps) {
-    const { children, onClick, className = "", variant = "default" } = props;
+    const { children, onClick, className, variant = "default" } = props;
 
     const container = useRef<HTMLDivElement>(null);
     const timeline = useRef<gsap.core.Timeline | null>(null);
-    const tween = useRef<gsap.core.Tween | null>(null);
 
     useGSAP(() => {
-        const btn = container.current?.querySelector('.btn') as HTMLButtonElement;
-        const label = container.current?.querySelector('.label') as HTMLDivElement;
-        const labelPseudo = container.current?.querySelector('.label-pseudo') as HTMLDivElement;
-        const btnBg = container.current?.querySelector('.btn-bg') as HTMLDivElement;
+        const btn = container.current?.querySelector('[data-gsap="btn"]') || null;
+        const label = container.current?.querySelector('[data-gsap="label"]') || null;
+        const labelPseudo = container.current?.querySelector('[data-gsap="label-pseudo"]') || null;
+        const btnBg = container.current?.querySelector('[data-gsap="btn-bg"]') || null;
 
         if (variant === "nav") {
             const hoverIn = () => {
@@ -46,11 +45,30 @@ export function Button(props: ButtonProps) {
                 btn?.removeEventListener('mouseenter', hoverIn);
                 btn?.removeEventListener('mouseleave', hoverOut);
             };
+        } else if (variant === "cta") {
+            const hoverIn = () => {
+                timeline.current = gsap.timeline()
+                    .to(btnBg, { scaleY: 1, autoAlpha: 1, duration: 1 })
+                    .to(label, { yPercent: -100 }, 0)
+                    .fromTo(labelPseudo, { yPercent: 100 }, { yPercent: -50 }, 0)
+            };
+
+            const hoverOut = () => timeline.current?.reverse();
+
+            btn?.addEventListener('mouseenter', hoverIn);
+            btn?.addEventListener('mouseleave', hoverOut);
+
+            return () => {
+                btn?.removeEventListener('mouseenter', hoverIn);
+                btn?.removeEventListener('mouseleave', hoverOut);
+            };
+
         } else {
             const hoverIn = () => {
-                timeline.current = gsap.timeline().to(btn, { x: 4, y: 4 });
-                tween.current = gsap.to(label, { y: -1, duration: 0.1, delay: 0.35 });
-                tween.current = gsap.to(label, { y: 0, duration: 0.1, delay: 0.4 });
+                timeline.current = gsap.timeline()
+                    .to(btn, { x: 4, y: 4 })
+                    .to(label, { y: -1, duration: 0.1, delay: 0.35 })
+                    .to(label, { y: 0, duration: 0.1, delay: 0.4 });
             };
 
             const hoverOut = () => timeline.current?.reverse();
@@ -71,28 +89,39 @@ export function Button(props: ButtonProps) {
                 <div ref={container} className='relative max-w-fit'>
                     <button
                         onClick={onClick}
-                        className={`btn relative px-4 py-2 bg-background border border-foreground text-foreground ${className}`}
+                        data-gsap="btn"
+                        className={cn(`btn relative px-4 py-2 bg-background border border-foreground text-foreground cursor-pointer`, className)}
                     >
-                        <div className='btn-bg absolute inset-0 m-auto bg-foreground scale-y-0 origin-bottom'></div>
+                        <div data-gsap="btn-bg" className='absolute inset-0 m-auto bg-foreground scale-y-0 origin-bottom'></div>
                         <div className='relative overflow-hidden'>
-                            <div className='label'>
+                            <div data-gsap="label">
                                 {children}
                             </div>
-                            <div className='label-pseudo absolute left-0 right-0 mx-auto top-1/2 translate-y-1/2 text-background'>{children}</div>
+                            <div
+                                data-gsap="label-pseudo"
+                                className='absolute left-0 right-0 mx-auto top-1/2 translate-y-1/2 text-background'
+                            >
+                                {children}
+                            </div>
                         </div>
                     </button>
                 </div>
             )
         case "cta":
             return (
-                <div ref={container} className='relative h-[68px] text-background text-center flex justify-center'>
-                    {/* <div className='absolute inset-0 bg-[#FEFDBF] clip-bevel' /> */}
-                    <div className='absolute inset-0 bg-[#FEFDBF] clip-bevel' />
-                    <div className='absolute inset-[1px] bg-foreground clip-bevel' />
-                    <div className='absolute inset-[1px] bg-linear-to-b from-[#989772]/25 to-[#E1CFAE]/50 clip-bevel shadow-[0_4px_0_rgba(254,253,191,0.25)]'></div>
-                    <button onClick={onClick}>
-                        <div className='label relative p-4 text-shadow-2xl text-shadow-slate-1000'>
-                            {children}
+                <div ref={container} className='relative h-[68px] text-background text-lg text-center flex items-center justify-center'>
+                    <button data-gsap="btn" onClick={onClick} className='w-full cursor-pointer'>
+                        <div data-gsap="btn-bg" className='absolute -inset-5 bg-radial from-[#FEFDBF]/60 to-[#FEFDBF]/0 to-65% opacity-0' />
+                        <div className='absolute inset-0 bg-[#FEFDBF] clip-bevel' />
+                        <div className='absolute inset-[1px] bg-foreground clip-bevel' />
+                        <div className='absolute inset-[1px] bg-linear-to-b from-[#989772]/50 to-[#E1CFAE] clip-bevel shadow-[0_4px_0_rgba(254,253,191,0.25)] opacity-50' />
+                        <div className='relative overflow-hidden'>
+                            <div data-gsap="label" className='relative text-shadow-2xl text-shadow-slate-1000'>
+                                {children}
+                            </div>
+                            <div data-gsap="label-pseudo" className='absolute w-full left-1/2 top-1/2 -translate-x-1/2 text-shadow-2xl text-shadow-slate-1000'>
+                                {children}
+                            </div>
                         </div>
                     </button>
                 </div>
@@ -100,12 +129,13 @@ export function Button(props: ButtonProps) {
         default:
             return (
                 <div ref={container} className='relative max-w-fit'>
-                    <div className='btn-bg w-full h-full absolute left-1 top-1 bg-foreground'></div>
+                    <div data-gsap="btn-bg" className='w-full h-full absolute left-1 top-1 bg-foreground'></div>
                     <button
                         onClick={onClick}
-                        className={`btn relative px-4 py-2 bg-background border border-foreground text-foreground ${className}`}
+                        data-gsap="btn"
+                        className={cn(`relative px-4 py-2 bg-background border border-foreground text-foreground cursor-pointer`, className)}
                     >
-                        <div className='label'>
+                        <div data-gsap="label">
                             {children}
                         </div>
                     </button>

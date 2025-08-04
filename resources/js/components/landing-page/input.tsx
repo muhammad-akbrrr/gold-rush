@@ -16,7 +16,7 @@ export function Input(props: InputProps) {
             <div className='absolute inset-0 bg-background clip-bevel' />
             <div className='absolute inset-[1px] bg-foreground clip-bevel' />
             <div className='absolute inset-[1px] bg-foreground clip-bevel'></div>
-            <input className='relative w-full p-4 focus:border-0' placeholder={placeholder} />
+            <input className='relative w-full p-4 focus-visible:outline-none' placeholder={placeholder} />
         </div>
     );
 }
