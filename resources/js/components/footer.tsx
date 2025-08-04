@@ -56,8 +56,8 @@ export const Footer = () => {
             <InteractiveGridPattern className="grid absolute inset-0 m-auto w-full h-auto" width={gridSize} height={gridSize} />
             <div className="relative flex flex-col gap-4 items-stretch bg-background">
                 <Separator className="mb-4 xl:mb-24" />
-                <div className="mx-4 2xl:mx-12 title-wrap overflow-hidden">
-                    <BrandName className="title w-full h-auto" />
+                <div className="mx-4 xl:mx-12 title-wrap overflow-hidden">
+                    <BrandName className="title" />
                 </div>
                 <p className="desc max-w-xl mx-4 xl:ms-12 font-bold text-base xl:text-xl">Project Gold Rush is a live, interactive platform for digital discovery.</p>
                 <Separator />

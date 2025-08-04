@@ -48,7 +48,7 @@ export const Trust = () => {
     return (
         <section ref={container} className="h-[150svh] w-full flex flex-col items-center bg-background overflow-hidden text-muted-foreground">
             <Separator className="grow-0" />
-            <h2 className="mx-4 md:mx-12 text-3xl 2xl:text-9xl font-bold text-center uppercase my-4">
+            <h2 className="mx-4 md:mx-12 text-3xl xl:text-8xl 2xl:text-9xl font-bold text-center uppercase my-4">
                 Built on a foundation of trust
             </h2>
             <Separator className="grow-0" />
