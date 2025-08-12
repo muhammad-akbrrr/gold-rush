@@ -12,7 +12,7 @@ export const Trust = () => {
     const isMobile = useIsMobile();
 
     useEffect(() => {
-        isMobile ? setGridSize(window.innerWidth / 5) : setGridSize(window.innerWidth / 12);
+        setGridSize(window.innerWidth / (isMobile ? 5 : 12));
     }, [isMobile]);
 
 

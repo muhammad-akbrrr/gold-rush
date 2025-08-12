@@ -13,7 +13,7 @@ export const Footer = () => {
     const isMobile = useIsMobile();
 
     useEffect(() => {
-        isMobile ? setGridSize(window.innerWidth / 6) : setGridSize(window.innerWidth / 12)
+        setGridSize(window.innerWidth / (isMobile ? 6 : 12));
     }, [isMobile])
 
     const container = useRef<HTMLDivElement>(null);
