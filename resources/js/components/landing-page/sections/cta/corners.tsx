@@ -11,13 +11,16 @@ export function Corners(props: CornersProps) {
 
     return (
         <svg
-            className={cn(`${
+            className={cn(
+                className,
                 position === "top left" ? "top-0 left-0" :
-                position === "top right" ? "top-0 right-0 -scale-x-100" :
-                position === "bottom left" ? "bottom-0 left-0 -scale-y-100" :
-                position === "bottom right" ? "bottom-0 right-0 -scale-100" :
-                ""
-            }`, className)}
+                    position === "top right" ? "top-0 right-0 -scale-x-100" :
+                        position === "bottom left" ? "bottom-0 left-0 -scale-y-100" :
+                            position === "bottom right" ? "bottom-0 right-0 -scale-100" :
+                                ""
+                ,
+
+            )}
             viewBox="0 0 312 485"
             fill="none"
             xmlns="http://www.w3.org/2000/svg">

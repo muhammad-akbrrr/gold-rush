@@ -1,5 +1,6 @@
 import { Alignment, Fit, Layout, useRive } from '@rive-app/react-webgl2';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TrustAnimProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -7,7 +8,7 @@ interface TrustAnimProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const TrustAnim = ({ className = "", ...props }: TrustAnimProps) => {
   const { RiveComponent } = useRive({
-    src: '/rive/trust.riv',
+    src: useIsMobile() ? '/rive/trust-mobile.riv' : '/rive/trust.riv',
     stateMachines: "State Machine 1",
     autoplay: true,
     layout: new Layout({
@@ -18,7 +19,7 @@ export const TrustAnim = ({ className = "", ...props }: TrustAnimProps) => {
 
   return (
     <div className={cn("", className)} {...props}>
-      <RiveComponent />
+      <RiveComponent className='rive-container w-full h-full' />
     </div>
   );
 };

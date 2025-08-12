@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Marquee } from "@/components/magicui/marquee";
 import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
@@ -10,12 +10,19 @@ import { HeroAnim } from "./hero/hero-anim";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const HeroSection = () => {
 
     const container = useRef(null);
+    const [gridSize, setGridSize] = useState<number>(0);
+    const isMobile = useIsMobile();
+
+    useEffect(() => {
+        setGridSize(window.innerWidth / (isMobile ? 5 : 12));
+    }, [isMobile]);
 
     useGSAP(() => {
         gsap.timeline({
@@ -49,8 +56,8 @@ export const HeroSection = () => {
                 </div>
                 <div className="absolute w-full h-full -z-10 top-0">
                     <div ref={container} className='w-full h-full overflow-hidden'>
-                        <InteractiveGridPattern className="absolute inset-0 left-1/2 max-w-5xl h-auto" width={64} height={64} />
-                        <HeroAnim className="absolute w-full h-full right-0 bottom-0 object-cover pointer-events-none" />
+                        <InteractiveGridPattern className="absolute inset-0 xl:left-1/2 xl:max-w-5xl h-full" width={gridSize} height={gridSize} />
+                        <HeroAnim className="absolute w-[150%] xl:w-full h-full right-0 bottom-0 object-cover pointer-events-none" />
                     </div>
                 </div>
             </div>
