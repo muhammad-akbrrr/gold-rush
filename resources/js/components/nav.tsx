@@ -14,7 +14,7 @@ export function Nav() {
                 {
                     useIsMobile() ?
                         <>
-                            <Button variant="nav"><Menu/></Button>
+                            <Button variant="nav" onClick={() => router.visit('/')}><Menu/></Button>
                         </>
                         :
                         <>

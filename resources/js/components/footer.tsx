@@ -58,7 +58,7 @@ export const Footer = () => {
             {/* <Grid className="absolute inset-0 m-auto w-full h-auto" /> */}
             <InteractiveGridPattern className="grid absolute inset-0 m-auto h-full w-auto xl:w-full" width={gridSize} height={gridSize} />
             <div className="relative flex flex-col gap-4 items-stretch bg-background">
-                <Separator className="mb-16 xl:mb-24" />
+                <Separator className="mb-4 xl:mb-24" />
                 <div className="mx-4 xl:mx-12 title-wrap overflow-hidden">
                     <BrandName className="title" />
                 </div>
