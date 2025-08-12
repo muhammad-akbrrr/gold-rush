@@ -197,6 +197,10 @@ body {
     font-family: 'Kode mono', monospace;
 }
 
+.rive-container > canvas {
+  touch-action: pan-y;
+}
+
 @layer utilities {
   .clip-bevel {
     clip-path: polygon(
