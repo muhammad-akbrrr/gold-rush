@@ -50,7 +50,10 @@ export const CTA = () => {
 
             }
             <div className="relative xl:p-12">
-                <div className="cta-card relative w-full h-screen md:h-full flex flex-col items-stretch justify-center gap-2 bg-foreground text-background p-8 xl:p-24 overflow-hidden">
+                <div className={
+                    `cta-card relative w-full h-screen md:h-full flex flex-col items-stretch
+                    justify-center gap-2 bg-foreground text-background p-8 xl:py-10 xl:px-16 2xl:p-24 overflow-hidden`
+                }>
                     {!useIsMobile() ?
                         <>
                             <Corners position="top left" />
@@ -61,8 +64,8 @@ export const CTA = () => {
                     }
                     <InteractiveGridPattern className="opacity-15 h-full" width={gridSize} height={gridSize} />
                     <span className="relative">The frontier is opening</span>
-                    <h2 className="relative text-5xl xl:text-6xl uppercase font-bold mb-6">Join the waitlist</h2>
-                    <p className="relative text-base xl:text-xl font-[Lekton]">
+                    <h2 className="relative text-5xl xl:text-4xl 2xl:text-6xl uppercase font-bold mb-6">Join the waitlist</h2>
+                    <p className="relative text-base xl:text-lg 2xl:text-xl font-[Lekton]">
                         Phase 1 is launching soon. The only way in is with $GOLDTOKEN. Join the official waitlist to get mission-critical updates and direct alerts on how to acquire your license to prospect. As a thank you for being early, all waitlist members will be eligible for our Genesis Airdrop of their first Reputation Points (RP) to kickstart their legacy.
                     </p>
                     <div className="relative space-y-4 mt-8">

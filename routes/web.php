@@ -7,6 +7,10 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+Route::get('/about', function () {
+    return Inertia::render('about');
+});
+
 Route::middleware('web3.auth')->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

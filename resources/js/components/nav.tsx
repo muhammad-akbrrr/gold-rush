@@ -10,17 +10,21 @@ export function Nav() {
     return (
         <nav className="min-w-screen flex justify-center bg-foreground text-background fixed z-50 py-2">
             <div className="w-full mx-4 xl:mx-12 flex justify-between items-center">
-                <BrandLogo />
+                <Link href="/">
+                    <BrandLogo />
+                </Link>
                 {
                     useIsMobile() ?
                         <>
-                            <Button variant="nav" onClick={() => router.visit('/')}><Menu/></Button>
+                            <Button variant="nav" onClick={() => router.visit('/')}><Menu /></Button>
                         </>
                         :
                         <>
                             <ul className="flex flex-1 gap-8 justify-around items-center text-lg">
                                 <li>
-                                    <Link className="text-background">About</Link>
+                                    <Link className="text-background" href="/about">
+                                        About
+                                    </Link>
                                 </li>
                                 <li>
                                     <Link className="text-background">Resources</Link>
