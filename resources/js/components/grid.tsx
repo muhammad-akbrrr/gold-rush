@@ -54,6 +54,49 @@ const GridComponent = ({ className, variant }: GridProps) => {
                 {horizontals.small}
             </svg>
         )
+    } else if (variant === "swiss") {
+        return (
+            <svg data-gsap="grid" className={cn("", className)} viewBox="0 0 1082 1514" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1.24414" y="0.99707" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="217.25" y="0.99707" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="433.256" y="0.99707" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="649.262" y="0.99707" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="865.268" y="0.99707" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="1.24414" y="217.003" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="217.25" y="217.003" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="433.256" y="217.003" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="649.262" y="217.003" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="865.268" y="217.003" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="1.24414" y="433.009" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="217.25" y="433.009" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="433.256" y="433.009" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="649.262" y="433.009" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="865.268" y="433.009" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="1.24414" y="649.015" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="217.25" y="649.015" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="433.256" y="649.015" width="216.006" height="216.006" fill="#D52B1E" />
+                <rect x="433.256" y="649.015" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <path d="M564.06 734.217H617.262V779.819H564.06V833.021H518.458V779.819H465.256V734.217H518.458V681.015H564.06V734.217Z" fill="white" />
+                <rect x="649.262" y="649.015" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="865.268" y="649.015" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="1.24414" y="865.021" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="217.25" y="865.021" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="433.256" y="865.021" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="649.262" y="865.021" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="865.268" y="865.021" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="1.24414" y="1081.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="217.25" y="1081.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="433.256" y="1081.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="649.262" y="1081.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="865.268" y="1081.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="1.24414" y="1297.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="217.25" y="1297.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="433.256" y="1297.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="649.262" y="1297.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+                <rect x="865.268" y="1297.03" width="216.006" height="216.006" stroke="#BEC1C8" />
+            </svg>
+
+        )
     } else if (variant === "sparse") {
         return (
             <svg className={cn("", className)} width="960" height="856" viewBox="0 0 960 856" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -70,7 +113,7 @@ const GridComponent = ({ className, variant }: GridProps) => {
     } else {
         return (
             <svg className={cn("", className)} width="1920" height="764" viewBox="0 0 1920 764" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <mask id="mask0_437_5" style={{maskType: "alpha"}} maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="764">
+                <mask id="mask0_437_5" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="764">
                     <rect width="1920" height="764" fill="url(#paint0_linear_437_5)" />
                 </mask>
                 <g mask="url(#mask0_437_5)">
