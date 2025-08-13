@@ -9,9 +9,6 @@ export function Values() {
 
     useGSAP(() => {
         const value = container.current?.querySelectorAll('[data-gsap="value-container"]') || null;
-        const title = container.current?.querySelector('[data-gsap="value-title"]') || null;
-        const separatorHorizontal = container.current?.querySelectorAll('[data-gsap="separator-horizontal"]') || null;
-        const separatorVertical = container.current?.querySelectorAll('[data-gsap="separator-vertical"]') || null;
 
         gsap.timeline({
             scrollTrigger: {
