@@ -6,17 +6,20 @@ import { useGSAP } from "@gsap/react";
 
 import gsap from "gsap";
 import { Link } from "./link";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Footer = () => {
     const [gridSize, setGridSize] = useState<number>(0);
+    const isMobile = useIsMobile();
 
     useEffect(() => {
-        setGridSize(window.innerWidth / 12)
-    }, [])
+        setGridSize(window.innerWidth / (isMobile ? 6 : 12));
+    }, [isMobile])
 
     const container = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
+
         const section = container.current?.querySelector('section');
         const grid = container.current?.querySelector('.grid') || null;
         const titleWrap = container.current?.querySelector('.title-wrap') || null;
@@ -53,7 +56,7 @@ export const Footer = () => {
     return (
         <footer ref={container} className="relative flex flex-col justify-between min-h-screen overflow-hidden text-muted-foreground">
             {/* <Grid className="absolute inset-0 m-auto w-full h-auto" /> */}
-            <InteractiveGridPattern className="grid absolute inset-0 m-auto w-full h-auto" width={gridSize} height={gridSize} />
+            <InteractiveGridPattern className="grid absolute inset-0 m-auto h-full w-auto xl:w-full" width={gridSize} height={gridSize} />
             <div className="relative flex flex-col gap-4 items-stretch bg-background">
                 <Separator className="mb-4 xl:mb-24" />
                 <div className="mx-4 xl:mx-12 title-wrap overflow-hidden">
@@ -62,53 +65,53 @@ export const Footer = () => {
                 <p className="desc max-w-xl mx-4 xl:ms-12 font-bold text-base xl:text-xl">Project Gold Rush is a live, interactive platform for digital discovery.</p>
                 <Separator />
             </div>
-            <div className="relative grid grid-cols-2 md:grid-cols-3 gap-4 bg-background">
+            <div className="relative grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 bg-background">
                 <Separator className="absolute top-0" />
                 <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
                     <li className="text-base xl:text-xl font-bold">Resources</li>
                     <li>
-                        <Link className="text-base xl:text-lg">Litepaper</Link>
+                        <Link className="text-sm xl:text-lg">Litepaper</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">Roadmap</Link>
+                        <Link className="text-sm xl:text-lg">Roadmap</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">Media Kit</Link>
+                        <Link className="text-sm xl:text-lg">Media Kit</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">FAQ</Link>
+                        <Link className="text-sm xl:text-lg">FAQ</Link>
                     </li>
                 </ul>
                 <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
                     <li className="text-base xl:text-xl font-bold">Community</li>
                     <li>
-                        <Link className="text-base xl:text-lg">Discord</Link>
+                        <Link className="text-sm xl:text-lg">Discord</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">Twitter (X)</Link>
+                        <Link className="text-sm xl:text-lg">Twitter (X)</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">Telegram</Link>
+                        <Link className="text-sm xl:text-lg">Telegram</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">Medium</Link>
+                        <Link className="text-sm xl:text-lg">Medium</Link>
                     </li>
                 </ul>
                 <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
                     <li className="text-base xl:text-xl font-bold">Legal</li>
                     <li>
-                        <Link className="text-base xl:text-lg">Privacy Policy</Link>
+                        <Link className="text-sm xl:text-lg">Privacy Policy</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">Terms and Conditions</Link>
+                        <Link className="text-sm xl:text-lg">Terms and Conditions</Link>
                     </li>
                     <li>
-                        <Link className="text-base xl:text-lg">Contact Us</Link>
+                        <Link className="text-sm xl:text-lg">Contact Us</Link>
                     </li>
                 </ul>
                 <Separator className="absolute bottom-0" />
             </div>
-            <div className="relative py-4 bg-background text-center text-sm">
+            <div className="relative py-4 bg-background text-center text-xs md:text-sm">
                 <Separator className="absolute top-0" />
                 © 2025 [Your Company Name]. A registered Swiss entity. All rights reserved.
             </div>

@@ -94,26 +94,33 @@ export const IntelligenceHub = () => {
     }, [])
 
     return (
-        <section ref={sectionContainer} id="intelligence-hub" className='flex flex-col min-h-svh relative z-0 overflow-hidden bg-background text-muted-foreground text-xl'>
+        <section ref={sectionContainer} id="intelligence-hub" className='flex flex-col justify-between max-h-dvh xl:max-h-svh min-h-svh relative z-0 overflow-hidden bg-background text-muted-foreground text-xl'>
             <h2 className="sr-only">Intelligence Hub</h2>
             <Separator className="mt-24" />
-            <div className="flex-1 md:grid grid-cols-3">
+            <div className="flex-1 md:grid md:grid-cols-3">
                 <div className="relative flex flex-col gap-4 justify-between">
                     <div className="flex-1 flex flex-col justify-center gap-4 font-bold mx-4 md:mx-12 py-4">
-                        <p>The Modern Prospectors’</p>
-                        <Hq className="w-full h-auto" />
+                        {
+                            useIsMobile() ?
+                                <p className="text-4xl">The Modern Prospectors’ HQ</p>
+                                :
+                                <>
+                                    <p>The Modern Prospectors’</p>
+                                    <Hq className="w-full h-auto" />
+                                </>
+                        }
                     </div>
                     <div className="flex-1 flex flex-col items-stretch font-bold uppercase text-base md:text-xl">
                         <Separator />
-                        <p className="flex-1 flex items-center mx-4 md:mx-12">
+                        <p className="flex-1 flex items-center mx-4 md:mx-12 py-2">
                             Selected: {contents.selected[activeIndex]}
                         </p>
                         <Separator />
-                        <p className="flex-1 flex items-center mx-4 md:mx-12">
+                        <p className="flex-1 flex items-center mx-4 md:mx-12 py-2">
                             Source: {contents.source[activeIndex]}
                         </p>
                         <Separator />
-                        <p className="flex-1 flex items-center mx-4 md:mx-12">
+                        <p className="flex-1 flex items-center mx-4 md:mx-12 py-2">
                             Function: {contents.function[activeIndex]}
                         </p>
                         <Separator />
@@ -136,39 +143,41 @@ export const IntelligenceHub = () => {
                     </div>
                     <Separator orientation="vertical" className="absolute right-0" />
                 </div>
-                <div ref={riveContainer} className="rive-column relative overflow-hidden">
-                    <InteractiveGridPattern width={gridSize} height={gridSize} className="grid w-auto absolute inset-0 mx-auto" />
-                    <HistorianAnim ref={riveRef} className="absolute historian-anim w-full h-full pointer-events-none" />
-                    <div className="ticker-wrapper absolute bg-background w-full max-h-3/4 bottom-0 translate-y-full flex flex-col gap-4 pb-4">
-                        <Separator />
-                        <div className="mx-4 text-3xl font-bold uppercase">
-                            Live Gold Price
+                {!useIsMobile() &&
+                    <div ref={riveContainer} className="rive-column relative overflow-hidden">
+                        <InteractiveGridPattern width={gridSize} height={gridSize} className="grid w-auto absolute inset-0 mx-auto" />
+                        <HistorianAnim ref={riveRef} className="absolute historian-anim w-full h-full pointer-events-none" />
+                        <div className="ticker-wrapper absolute bg-background w-full max-h-3/4 bottom-0 translate-y-full flex flex-col gap-4 pb-4">
+                            <Separator />
+                            <div className="mx-4 text-3xl font-bold uppercase">
+                                Live Gold Price
+                            </div>
+                            <PriceTicker />
+                            <Separator />
+                            <span className="text-3xl font-bold uppercase mx-4">Latest gold news</span>
+                            <Marquee vertical={true} className="flex flex-col gap-4 max-h-1/2">
+                                <div className="font-bold text-main mx-4 font-[Lekton]">
+                                    Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
+                                    <div className="font-normal text-sm">9 hours ago</div>
+                                </div>
+                                <div className="font-bold text-main mx-4 font-[Lekton]">
+                                    Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
+                                    <div className="font-normal text-sm">9 hours ago</div>
+                                </div>
+                                <div className="font-bold text-main mx-4 font-[Lekton]">
+                                    Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
+                                    <div className="font-normal text-sm">9 hours ago</div>
+                                </div>
+                                <div className="font-bold text-main mx-4 font-[Lekton]">
+                                    Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
+                                    <div className="font-normal text-sm">9 hours ago</div>
+                                </div>
+                            </Marquee>
                         </div>
-                        <PriceTicker />
-                        <Separator />
-                        <span className="text-3xl font-bold uppercase mx-4">Latest gold news</span>
-                        <Marquee vertical={true} className="flex flex-col gap-4 max-h-1/2">
-                            <div className="font-bold text-main mx-4 font-[Lekton]">
-                                Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
-                                <div className="font-normal text-sm">9 hours ago</div>
-                            </div>
-                            <div className="font-bold text-main mx-4 font-[Lekton]">
-                                Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
-                                <div className="font-normal text-sm">9 hours ago</div>
-                            </div>
-                            <div className="font-bold text-main mx-4 font-[Lekton]">
-                                Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
-                                <div className="font-normal text-sm">9 hours ago</div>
-                            </div>
-                            <div className="font-bold text-main mx-4 font-[Lekton]">
-                                Wall Street thrives while Main Street struggles: Financial Stress Index soars to pandemic-era levels
-                                <div className="font-normal text-sm">9 hours ago</div>
-                            </div>
-                        </Marquee>
                     </div>
-                </div>
+                }
                 <div className="relative flex flex-col gap-4 items-stretch justify-between">
-                    <Separator orientation="vertical" className="absolute left-0" />
+                    <Separator orientation={useIsMobile() ? "horizontal" : "vertical"} className="absolute left-0" />
                     <div className="flex flex-col gap-4 text-large font-bold mx-4 md:mx-12 py-4">
                         <p className="capitalize">{contents.headText[activeIndex]}</p>
                         <p className="text-3xl md:text-4xl 2xl:text-5xl font-bold uppercase">{contents.title[activeIndex]}</p>
@@ -182,12 +191,12 @@ export const IntelligenceHub = () => {
                                 <img src="/images/check.png" className="w-1/2 mx-auto" />
                             </>
                     }
-                    <p className="flex flex-col justify-end mx-4 md:mx-12 py-12 text-base/6 xl:text-lg/7 2xl:text-xl/8 font-[Lekton]">
+                    <p className="flex flex-col justify-end mx-4 md:mx-12 py-0 xl:py-12 text-base/6 xl:text-lg/7 2xl:text-xl/8 font-[Lekton]">
                         {contents.desc[activeIndex]}
                     </p>
                 </div>
             </div>
-            <Separator className="mb-12" />
+            <Separator className="xl:mb-12" />
         </section>
     )
 }

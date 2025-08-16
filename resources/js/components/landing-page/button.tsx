@@ -109,7 +109,7 @@ export function Button(props: ButtonProps) {
             )
         case "cta":
             return (
-                <div ref={container} className='relative h-[68px] text-background text-lg text-center flex items-center justify-center'>
+                <div ref={container} className={cn(className, 'relative h-[68px] text-background text-center flex items-center justify-center')}>
                     <button data-gsap="btn" onClick={onClick} className='w-full cursor-pointer'>
                         <div data-gsap="btn-bg" className='absolute -inset-5 bg-radial from-[#FEFDBF]/60 to-[#FEFDBF]/0 to-65% opacity-0' />
                         <div className='absolute inset-0 bg-[#FEFDBF] clip-bevel' />
