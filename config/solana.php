@@ -50,6 +50,7 @@ return [
         'timeout' => env('SOLANA_TIMEOUT', 10), // seconds
         'retry_attempts' => env('SOLANA_RETRY_ATTEMPTS', 3),
         'retry_delay' => env('SOLANA_RETRY_DELAY', 1000), // milliseconds
+        'verify_ssl' => env('SOLANA_VERIFY_SSL', PHP_OS_FAMILY !== 'Windows'), // Disable SSL verification on Windows by default
     ],
 
     /*

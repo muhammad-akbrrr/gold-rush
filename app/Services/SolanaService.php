@@ -52,7 +52,15 @@ class SolanaService implements SolanaServiceInterface
     }
 
     try {
-      $response = Http::timeout(10)->post($this->rpcUrl, [
+      // Configure HTTP client with SSL options
+      $httpClient = Http::timeout(10);
+
+      // Check if SSL verification should be disabled
+      if (!config('solana.connection.verify_ssl', true)) {
+        $httpClient = $httpClient->withoutVerifying();
+      }
+
+      $response = $httpClient->post($this->rpcUrl, [
         'jsonrpc' => '2.0',
         'id' => 1,
         'method' => 'getTokenAccountsByOwner',
@@ -172,7 +180,7 @@ class SolanaService implements SolanaServiceInterface
   {
     return [
       'mint_address' => $this->tokenMintAddress,
-      'min_balance' => $this->minTokenBalance,
+      'min_balance' => $this->minTokenBalance * pow(10, $this->tokenDecimals),
       'decimals' => $this->tokenDecimals,
       'network' => config('web3.network'),
     ];
@@ -261,7 +269,15 @@ class SolanaService implements SolanaServiceInterface
   public function getNetworkStatus(): array
   {
     try {
-      $response = Http::timeout(5)->post($this->rpcUrl, [
+      // Configure HTTP client with SSL options
+      $httpClient = Http::timeout(5);
+
+      // Check if SSL verification should be disabled
+      if (!config('solana.connection.verify_ssl', true)) {
+        $httpClient = $httpClient->withoutVerifying();
+      }
+
+      $response = $httpClient->post($this->rpcUrl, [
         'jsonrpc' => '2.0',
         'id' => 1,
         'method' => 'getHealth',

@@ -44,12 +44,10 @@ class Web3LoginRequest extends FormRequest
       'signature' => [
         'nullable',
         'string',
-        'required_with:message',
       ],
       'message' => [
         'nullable',
         'string',
-        'required_with:signature',
       ],
       'display_name' => [
         'nullable',

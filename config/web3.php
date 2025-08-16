@@ -24,7 +24,7 @@ return [
   |
   */
 
-  'token_mint_address' => env('TOKEN_MINT_ADDRESS', 'AgnN9mUVXm9QDdo9SZm7jPiqkcVJCpgpYp5KT5avSujs'),
+  'token_mint_address' => env('TOKEN_MINT_ADDRESS', ''),
 
   'min_token_balance' => env('MIN_TOKEN_BALANCE', 100000),
 
@@ -77,9 +77,7 @@ return [
     'supported_wallets' => [
       'phantom',
       'solflare',
-      'backpack',
-      'slope',
-      'exodus',
+      'metamask',
     ],
   ],
 

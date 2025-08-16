@@ -27,7 +27,7 @@ class Web3AuthMiddleware
     // Get current user
     $user = $this->authService->getCurrentUser();
 
-    // If no user is authenticated, redirect to login
+    // If no user is authenticated, redirect to connect-wallet
     if (!$user) {
       if ($request->expectsJson()) {
         return response()->json([
