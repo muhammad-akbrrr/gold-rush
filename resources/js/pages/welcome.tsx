@@ -1,12 +1,12 @@
 import { Footer } from '@/components/footer';
 import { CTA } from '@/components/landing-page/cta';
-import { Nav } from '@/components/landing-page/nav';
 import { HeroSection } from '@/components/landing-page/sections/hero';
 import { IntelligenceHub } from '@/components/landing-page/sections/intelligence-hub';
 import { LiveOperation } from '@/components/landing-page/sections/live-operation';
 import { Reputation } from '@/components/landing-page/sections/reputation';
 import { Tools } from '@/components/landing-page/sections/tools';
-import { Trust } from '@/components/landing-page/trust';
+import { Trust } from '@/components/landing-page/sections/trust';
+import { Nav } from '@/components/nav';
 import { Head } from '@inertiajs/react';
 
 export default function Welcome() {

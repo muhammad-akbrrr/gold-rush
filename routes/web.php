@@ -8,6 +8,10 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+Route::get('/about', function () {
+    return Inertia::render('about');
+});
+
 // Public Web3 API Routes (no authentication required)
 Route::prefix('web3')->group(function () {
     Route::get('/token-info', [Web3ApiController::class, 'getTokenInfo'])->name('web3.token-info');
