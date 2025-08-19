@@ -2,22 +2,12 @@
 
 namespace App\Http\Requests\Web3;
 
-use App\Services\WalletValidationService;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
 class ConnectWalletRequest extends FormRequest
 {
-    protected WalletValidationService $walletValidator;
-
-    public function __construct(WalletValidationService $walletValidator)
-    {
-        parent::__construct();
-        $this->walletValidator = $walletValidator;
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -47,39 +37,31 @@ class ConnectWalletRequest extends FormRequest
             'wallet_address' => [
                 'required',
                 'string',
-                'size:44', // Solana addresses are typically 44 characters
-                function ($attribute, $value, $fail) {
-                    $validation = $this->walletValidator->validate($value);
-                    
-                    if (!$validation['valid']) {
-                        Log::warning('Invalid wallet address in connection request', [
-                            'wallet_address' => $value,
-                            'ip' => $this->ip(),
-                            'user_agent' => $this->userAgent(),
-                            'errors' => $validation['errors']
-                        ]);
-                        
-                        $fail('The wallet address format is invalid.');
-                    }
-                },
+                'regex:/^[1-9A-HJ-NP-Za-km-z]{32,44}$/',
             ],
             'signature' => [
-                'required',
+                'nullable',
                 'string',
                 'min:64',
-                'max:128', // Base58 encoded signatures can vary in length
+                'max:128',
             ],
             'message' => [
-                'required',
+                'nullable',
                 'string',
+                'required_with:signature',
                 'min:10',
                 'max:500',
+            ],
+            'wallet_type' => [
+                'nullable',
+                'string',
+                'in:phantom,solflare,metamask',
             ],
             'display_name' => [
                 'nullable',
                 'string',
                 'max:100',
-                'regex:/^[a-zA-Z0-9\s\-_.]+$/', // Allow alphanumeric, spaces, hyphens, underscores, periods
+                'regex:/^[a-zA-Z0-9\s\-_.]+$/',
             ],
         ];
     }
@@ -90,16 +72,28 @@ class ConnectWalletRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'wallet_address.required' => 'Wallet address is required for connection.',
-            'wallet_address.size' => 'Wallet address must be exactly 44 characters.',
-            'signature.required' => 'Signature is required to verify wallet ownership.',
+            'wallet_address.required' => 'Wallet address is required.',
+            'wallet_address.regex' => 'Invalid wallet address format.',
             'signature.min' => 'Signature must be at least 64 characters.',
             'signature.max' => 'Signature must not exceed 128 characters.',
-            'message.required' => 'Message is required for signature verification.',
+            'message.required_with' => 'Message is required when signature is provided.',
             'message.min' => 'Message must be at least 10 characters.',
             'message.max' => 'Message must not exceed 500 characters.',
+            'wallet_type.in' => 'Wallet type must be phantom, solflare, or metamask.',
             'display_name.max' => 'Display name must not exceed 100 characters.',
             'display_name.regex' => 'Display name can only contain letters, numbers, spaces, hyphens, underscores, and periods.',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     */
+    public function attributes(): array
+    {
+        return [
+            'wallet_address' => 'wallet address',
+            'wallet_type' => 'wallet type',
+            'display_name' => 'display name',
         ];
     }
 
@@ -110,27 +104,10 @@ class ConnectWalletRequest extends FormRequest
     {
         $this->merge([
             'wallet_address' => trim($this->wallet_address ?? ''),
-            'signature' => trim($this->signature ?? ''),
-            'message' => trim($this->message ?? ''),
+            'signature' => $this->signature ? trim($this->signature) : null,
+            'message' => $this->message ? trim($this->message) : null,
+            'wallet_type' => $this->wallet_type ? trim($this->wallet_type) : null,
             'display_name' => $this->display_name ? trim($this->display_name) : null,
         ]);
-    }
-
-    /**
-     * Get the validated data from the request.
-     */
-    public function validated($key = null, $default = null): array
-    {
-        $validated = parent::validated();
-
-        // Log successful validation for security monitoring
-        Log::info('Wallet connection request validated', [
-            'wallet_address' => $validated['wallet_address'],
-            'has_display_name' => !empty($validated['display_name']),
-            'ip' => $this->ip(),
-            'user_agent' => $this->userAgent(),
-        ]);
-
-        return $validated;
     }
 }

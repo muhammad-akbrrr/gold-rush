@@ -5,8 +5,8 @@ namespace App\Http\Middleware;
 use App\Services\Web3AuthService;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Log;
 
 class Web3AuthMiddleware
 {
@@ -36,7 +36,7 @@ class Web3AuthMiddleware
         ], 401);
       }
 
-      return redirect()->route('web3.login');
+      return redirect()->route('web3.login.inertia');
     }
 
     // Check if user has sufficient balance
@@ -53,7 +53,7 @@ class Web3AuthMiddleware
         ], 403);
       }
 
-      return redirect()->route('web3.login')->withErrors([
+      return redirect()->route('web3.login.inertia')->withErrors([
         'wallet_address' => config('web3.messages.insufficient_balance'),
       ]);
     }
@@ -68,7 +68,7 @@ class Web3AuthMiddleware
         $this->authService->refreshAuthentication($user);
       } catch (\Exception $e) {
         // Log error but don't fail the request
-        \Log::warning('Failed to refresh balance in middleware', [
+        Log::warning('Failed to refresh balance in middleware', [
           'wallet_address' => $user->wallet_address,
           'error' => $e->getMessage(),
         ]);

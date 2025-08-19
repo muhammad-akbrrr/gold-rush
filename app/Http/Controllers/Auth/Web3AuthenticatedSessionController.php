@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\Web3LoginRequest;
+use App\Http\Requests\Web3\ConnectWalletRequest;
+use App\Http\Requests\Web3\RefreshBalanceRequest;
 use App\Services\Web3AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -157,6 +160,8 @@ class Web3AuthenticatedSessionController extends Controller
     ]);
   }
 
+
+
   /**
    * Check if a wallet can authenticate (without actually authenticating).
    */
@@ -193,5 +198,133 @@ class Web3AuthenticatedSessionController extends Controller
       'user' => $user->only(['id', 'wallet_address', 'display_name', 'token_balance', 'is_authenticated', 'last_balance_check']),
       'balance_sufficient' => $user->hasSufficientBalance(),
     ]);
+  }
+
+  // ============================================
+  // INERTIA-FOCUSED METHODS (NEW ARCHITECTURE)
+  // ============================================
+
+  /**
+   * Display the wallet connection page (Inertia version).
+   */
+  public function createInertia(): Response
+  {
+    try {
+      $tokenInfo = null;
+      $networkStatus = null;
+
+      // Try to get Solana service info
+      if (app()->bound('solana')) {
+        try {
+          $tokenInfo = app('solana')->getTokenInfo();
+          $networkStatus = app('solana')->getNetworkStatus();
+        } catch (\Exception $e) {
+          // Silently continue if solana service has issues
+        }
+      }
+
+      return Inertia::render('auth/connect-wallet', [
+        'tokenInfo' => $tokenInfo,
+        'networkStatus' => $networkStatus,
+        'minTokenBalance' => config('web3.min_token_balance', 100000),
+        'supportedWallets' => ['phantom', 'solflare', 'metamask'],
+      ]);
+    } catch (\Exception $e) {
+      return Inertia::render('auth/connect-wallet', [
+        'tokenInfo' => null,
+        'networkStatus' => null,
+        'minTokenBalance' => config('web3.min_token_balance', 100000),
+        'supportedWallets' => ['phantom', 'solflare', 'metamask'],
+      ]);
+    }
+  }
+
+  /**
+   * Handle wallet connection and authentication (Inertia version).
+   */
+  public function storeInertia(ConnectWalletRequest $request): RedirectResponse
+  {
+    try {
+      // Authenticate user with provided wallet data
+      $user = $this->authService->authenticate(
+        $request->wallet_address,
+        $request->message,
+        $request->signature,
+        $request->display_name
+      );
+
+      if (!$user) {
+        return back()->withErrors([
+          'wallet_address' => config('web3.messages.authentication_failed'),
+        ])->withInput();
+      }
+
+      // Regenerate session for security
+      $request->session()->regenerate();
+
+      // Redirect to dashboard with success message
+      return redirect()->route('dashboard')->with('success', 'Wallet connected successfully!');
+
+    } catch (ValidationException $e) {
+      return back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+      return back()->withErrors([
+        'wallet_address' => 'An error occurred during authentication. Please try again.',
+      ])->withInput();
+    }
+  }
+
+
+  /**
+   * Refresh balance and authentication status (Inertia version).
+   */
+  public function refreshInertia(RefreshBalanceRequest $request): RedirectResponse
+  {
+    $user = $this->authService->getCurrentUser();
+
+    if (!$user) {
+      return redirect()->route('web3.login.inertia')->withErrors([
+        'authentication' => 'Please connect your wallet first.',
+      ]);
+    }
+
+    try {
+      $success = $this->authService->refreshAuthentication($user);
+
+      if (!$success) {
+        return back()->withErrors([
+          'refresh' => 'Failed to refresh balance. Please try again.',
+        ]);
+      }
+
+      // Check if user still has sufficient balance after refresh
+      if (!$user->hasSufficientBalance()) {
+        // User lost sufficient balance, logout and redirect
+        $this->authService->logoutUser();
+        return redirect()->route('web3.login.inertia')->withErrors([
+          'balance' => config('web3.messages.insufficient_balance'),
+        ]);
+      }
+
+      return back()->with('success', 'Balance refreshed successfully!');
+
+    } catch (\Exception $e) {
+      return back()->withErrors([
+        'refresh' => 'An error occurred while refreshing balance.',
+      ]);
+    }
+  }
+
+  /**
+   * Logout user (Inertia version).
+   */
+  public function destroyInertia(Request $request): RedirectResponse
+  {
+    $this->authService->logoutUser();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('web3.login.inertia')->with('success', 'Logged out successfully!');
   }
 }
