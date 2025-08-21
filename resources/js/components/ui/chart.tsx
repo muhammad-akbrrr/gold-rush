@@ -1,14 +1,5 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
-import {
-  Area,
-  AreaChart,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts"
 
 import { cn } from "@/lib/utils"
 
@@ -48,22 +39,14 @@ function ChartContainer({
   config,
   ...props
 }: React.ComponentProps<"div"> & {
-  config?: ChartConfig
-  children: React.ReactNode
+  config: ChartConfig
+  children: React.ComponentProps<
+    typeof RechartsPrimitive.ResponsiveContainer
+  >["children"]
 }) {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
-  // If no config provided, render simple container like chart-example
-  if (!config) {
-    return (
-      <div className={cn("w-full h-full", className)} {...props}>
-        {children}
-      </div>
-    )
-  }
-
-  // Otherwise use existing complex logic with ResponsiveContainer
   return (
     <ChartContext.Provider value={{ config }}>
       <div
@@ -77,7 +60,7 @@ function ChartContainer({
       >
         <ChartStyle id={chartId} config={config} />
         <RechartsPrimitive.ResponsiveContainer>
-          {children as React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"]}
+          {children}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
@@ -358,8 +341,6 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
-const ResponsiveContainer = RechartsPrimitive.ResponsiveContainer
-
 export {
   ChartContainer,
   ChartTooltip,
@@ -367,13 +348,4 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
-  // Recharts components re-exports
-  Area,
-  AreaChart,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
 }

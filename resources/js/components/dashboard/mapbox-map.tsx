@@ -1,47 +1,5 @@
 import mapboxgl from 'mapbox-gl';
-import React, { useEffect, useRef } from 'react';
-
-// Mapbox access token will be set from props
-
-// Disable Mapbox telemetry globally to prevent network errors
-const mapboxExtended = mapboxgl as typeof mapboxgl & {
-    supported: unknown;
-    setRTLTextPlugin: () => void;
-};
-
-const supportedFunction = (() => true) as typeof mapboxgl.supported;
-supportedFunction.webGLContextAttributes = {} as WebGLContextAttributes;
-mapboxExtended.supported = supportedFunction;
-mapboxExtended.setRTLTextPlugin = () => {};
-
-// Disable telemetry by overriding the worker message handler
-if (typeof window !== 'undefined') {
-    const originalFetch = window.fetch;
-    window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
-        const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-
-        // Block Mapbox telemetry and analytics requests
-        if (
-            url &&
-            (url.includes('events.mapbox.com') ||
-                url.includes('api.mapbox.com/events') ||
-                url.includes('api.mapbox.com/v1/turnstile') ||
-                url.includes('api.mapbox.com/analytics') ||
-                url.includes('api.mapbox.com/v1/sku'))
-        ) {
-            // Return a resolved promise that mimics a successful response
-            return Promise.resolve(
-                new Response('{}', {
-                    status: 200,
-                    statusText: 'OK',
-                    headers: { 'Content-Type': 'application/json' },
-                }),
-            );
-        }
-
-        return originalFetch.call(this, input, init);
-    };
-}
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 interface NodeLocation {
     id: string;
@@ -56,7 +14,7 @@ interface MapboxMapProps {
     mapboxToken: string | null;
 }
 
-// Sample node locations based on the design (yellow dots)
+// Sample node locations
 const nodeLocations: NodeLocation[] = [
     { id: 'houston', lng: -95.3698, lat: 29.7604, label: 'Houston, Texas' },
     { id: 'london', lng: -0.1276, lat: 51.5074, label: 'London' },
@@ -70,237 +28,286 @@ const nodeLocations: NodeLocation[] = [
     { id: 'saopaulo', lng: -46.6333, lat: -23.5505, label: 'São Paulo' },
 ];
 
-const MapboxMap: React.FC<MapboxMapProps> = ({ className, onMapLoad, mapboxToken }) => {
+const MapboxMap: React.FC<MapboxMapProps> = React.memo(({ className, onMapLoad, mapboxToken }) => {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<mapboxgl.Map | null>(null);
+    const cleanupFunctions = useRef<Array<() => void>>([]);
+    const currentPopup = useRef<mapboxgl.Popup | null>(null);
 
-    // Check for component error conditions
-    const hasTokenError = mapboxToken === undefined;
-    const hasInvalidToken = !mapboxToken || !mapboxToken.startsWith('pk.');
+    // Memoize error conditions
+    const hasTokenError = useMemo(() => mapboxToken === undefined, [mapboxToken]);
+    const hasInvalidToken = useMemo(() => !mapboxToken || !mapboxToken.startsWith('pk.'), [mapboxToken]);
+
+    // Cleanup function to prevent memory leaks
+    const cleanup = useCallback(() => {
+        // Close any open popups
+        if (currentPopup.current) {
+            currentPopup.current.remove();
+            currentPopup.current = null;
+        }
+
+        // Run all registered cleanup functions
+        cleanupFunctions.current.forEach((cleanupFn) => {
+            try {
+                cleanupFn();
+            } catch (error) {
+                console.warn('Cleanup function error:', error);
+            }
+        });
+        cleanupFunctions.current = [];
+
+        // Clean up map
+        if (map.current) {
+            try {
+                // Remove all layers and sources properly
+                const mapInstance = map.current;
+
+                if (mapInstance.getLayer('node-markers')) {
+                    mapInstance.removeLayer('node-markers');
+                }
+                if (mapInstance.getLayer('node-markers-pulse')) {
+                    mapInstance.removeLayer('node-markers-pulse');
+                }
+                if (mapInstance.getSource('node-locations')) {
+                    mapInstance.removeSource('node-locations');
+                }
+
+                // Remove map
+                mapInstance.remove();
+                map.current = null;
+
+                console.log('Map cleaned up successfully');
+            } catch (error) {
+                console.warn('Error during map cleanup:', error);
+            }
+        }
+    }, []);
+
+    // Add cleanup function to registry
+    const addCleanup = useCallback((cleanupFn: () => void) => {
+        cleanupFunctions.current.push(cleanupFn);
+    }, []);
 
     useEffect(() => {
         if (map.current || !mapContainer.current) return;
 
-        // Early return if no token provided
         if (hasInvalidToken) {
             console.error('Invalid or missing Mapbox token:', mapboxToken);
             if (mapContainer.current) {
                 mapContainer.current.innerHTML = `
-          <div style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            background: linear-gradient(to bottom, #2F3032, #181819);
-            color: #EDF1FA;
-            font-family: 'Kode Mono', monospace;
-            text-align: center;
-          ">
-            <div>
-              <h2 style="font-size: 18px; margin-bottom: 8px;">Map Configuration Error</h2>
-              <p style="font-size: 14px; opacity: 0.7;">Mapbox token not configured</p>
-              <p style="font-size: 12px; opacity: 0.5; margin-top: 8px;">Please check your environment variables</p>
-            </div>
-          </div>
-        `;
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        background: linear-gradient(to bottom, #2F3032, #181819);
+                        color: #EDF1FA;
+                        font-family: 'Kode Mono', monospace;
+                        text-align: center;
+                    ">
+                        <div>
+                            <h2 style="font-size: 18px; margin-bottom: 8px;">Map Configuration Error</h2>
+                            <p style="font-size: 14px; opacity: 0.7;">Mapbox token not configured</p>
+                            <p style="font-size: 12px; opacity: 0.5; margin-top: 8px;">Please check your environment variables</p>
+                        </div>
+                    </div>
+                `;
             }
             return;
         }
 
-        // Set the access token from props
+        // Set the access token
         mapboxgl.accessToken = mapboxToken;
 
         console.log('Initializing Mapbox map...');
-        console.log('Mapbox token:', mapboxgl.accessToken?.substring(0, 20) + '...');
 
         try {
-            // Initialize map
+            // Initialize map with simplified configuration
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: 'mapbox://styles/mapbox/dark-v11', // Dark theme to match design
-                center: [0, 20], // Center on world view
+                style: 'mapbox://styles/mapbox/dark-v10',
+                center: [0, 20],
                 zoom: 1.5,
-                projection: 'mercator', // Google Maps style projection
-                attributionControl: false, // Remove attribution control
-                logoPosition: 'bottom-left', // We'll hide this with CSS
-                collectResourceTiming: false, // Disable resource timing collection
-                maxTileCacheSize: 50, // Reduce tile cache size
-                // Disable telemetry to prevent network errors
-                trackResize: false,
-                bearingSnap: 7,
-                pitchWithRotate: false,
-                interactive: true,
+                minZoom: 0.5,
+                maxZoom: 8,
+
+                // Basic performance optimizations
+                attributionControl: false,
+                collectResourceTiming: false,
+                maxTileCacheSize: 50, // Reduced cache size
+                renderWorldCopies: false,
+
+                // Simplified interactions
                 boxZoom: false,
                 doubleClickZoom: false,
                 dragRotate: false,
-                dragPan: true,
-                keyboard: false,
-                scrollZoom: true,
                 touchZoomRotate: false,
-                // Most importantly, disable all telemetry
-                transformRequest: (url: string) => {
-                    // Block telemetry and analytics requests
-                    if (
-                        url.includes('events.mapbox.com') ||
-                        url.includes('api.mapbox.com/events') ||
-                        url.includes('api.mapbox.com/v1/turnstile') ||
-                        url.includes('api.mapbox.com/analytics')
-                    ) {
-                        return { url: '' }; // Return empty URL to cancel request
-                    }
-                    return { url };
-                },
             });
 
             console.log('Mapbox map created successfully');
         } catch (error) {
             console.error('Error creating Mapbox map:', error);
-            // Show fallback content
             if (mapContainer.current) {
                 mapContainer.current.innerHTML = `
-          <div style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            background: linear-gradient(to bottom, #2F3032, #181819);
-            color: #EDF1FA;
-            font-family: 'Kode Mono', monospace;
-            text-align: center;
-          ">
-            <div>
-              <h2 style="font-size: 18px; margin-bottom: 8px;">Map Unavailable</h2>
-              <p style="font-size: 14px; opacity: 0.7;">Unable to load interactive map</p>
-            </div>
-          </div>
-        `;
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        background: linear-gradient(to bottom, #2F3032, #181819);
+                        color: #EDF1FA;
+                        font-family: 'Kode Mono', monospace;
+                        text-align: center;
+                    ">
+                        <div>
+                            <h2 style="font-size: 18px; margin-bottom: 8px;">Map Unavailable</h2>
+                            <p style="font-size: 14px; opacity: 0.7;">Unable to load interactive map</p>
+                        </div>
+                    </div>
+                `;
             }
             return;
         }
 
         // Hide Mapbox logo
         const style = document.createElement('style');
-        style.textContent = `
-      .mapboxgl-ctrl-logo {
-        display: none !important;
-      }
-    `;
+        style.textContent = `.mapboxgl-ctrl-logo { display: none !important; }`;
         document.head.appendChild(style);
+        addCleanup(() => document.head.removeChild(style));
 
-        map.current.on('load', () => {
+        const handleMapLoad = () => {
             if (!map.current) return;
 
             console.log('Map loaded successfully');
 
-            // Add yellow dot markers for each node location
-            nodeLocations.forEach((node) => {
-                try {
-                    // Create a custom marker element
-                    const markerElement = document.createElement('div');
-                    markerElement.className = 'node-marker';
-                    markerElement.style.cssText = `
-            width: 12px;
-            height: 12px;
-            background: #FFD700;
-            border: 2px solid #FFF;
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-            cursor: pointer;
-            animation: pulse 2s infinite;
-          `;
+            try {
+                // Add source for markers
+                map.current.addSource('node-locations', {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: nodeLocations.map((node) => ({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [node.lng, node.lat],
+                            },
+                            properties: {
+                                id: node.id,
+                                label: node.label,
+                            },
+                        })),
+                    },
+                    cluster: false,
+                });
 
-                    // Add pulsing animation (only once)
-                    if (!document.getElementById('node-pulse-animation')) {
-                        const style = document.createElement('style');
-                        style.id = 'node-pulse-animation';
-                        style.textContent = `
-              @keyframes pulse {
-                0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-                50% { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
-                100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-              }
-            `;
-                        document.head.appendChild(style);
+                // Add marker layer - GPU accelerated circles only
+                map.current.addLayer({
+                    id: 'node-markers',
+                    type: 'circle',
+                    source: 'node-locations',
+                    paint: {
+                        'circle-radius': ['interpolate', ['linear'], ['zoom'], 1, 4, 8, 8],
+                        'circle-color': '#FFD700',
+                        'circle-stroke-color': '#FFF',
+                        'circle-stroke-width': 2,
+                        'circle-opacity': 0.9,
+                        'circle-stroke-opacity': 1,
+                    },
+                });
+
+                // Click handler for markers
+                const handleMarkerClick = (
+                    e: mapboxgl.MapMouseEvent & {
+                        features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
+                    },
+                ) => {
+                    // TODO: add click handler here
+                };
+
+                // Cursor handlers
+                const handleMouseEnter = () => {
+                    if (map.current) {
+                        map.current.getCanvas().style.cursor = 'pointer';
                     }
+                };
 
-                    // Create marker
-                    new mapboxgl.Marker(markerElement).setLngLat([node.lng, node.lat]).addTo(map.current!);
+                const handleMouseLeave = () => {
+                    if (map.current) {
+                        map.current.getCanvas().style.cursor = '';
+                    }
+                };
 
-                    // Add popup on click
-                    const popup = new mapboxgl.Popup({
-                        offset: 25,
-                        className: 'node-popup',
-                    }).setHTML(`
-            <div style="
-              background: linear-gradient(to bottom, rgba(142, 145, 150, 0.2), #181819);
-              border: 1px solid #47484B;
-              border-radius: 8px;
-              padding: 12px;
-              color: #EDF1FA;
-              font-family: 'Kode Mono', monospace;
-              font-size: 14px;
-              font-weight: 700;
-              backdrop-filter: blur(4px);
-            ">
-              ${node.label}
-              ${node.id === 'houston' ? '<br><span style="font-family: Lekton; font-size: 12px; font-weight: 400;">8 total operations</span>' : ''}
-            </div>
-          `);
+                // Add event listeners
+                map.current.on('click', 'node-markers', handleMarkerClick);
+                map.current.on('mouseenter', 'node-markers', handleMouseEnter);
+                map.current.on('mouseleave', 'node-markers', handleMouseLeave);
 
-                    markerElement.addEventListener('click', () => {
-                        popup.setLngLat([node.lng, node.lat]).addTo(map.current!);
-                    });
-                } catch (error) {
-                    console.error('Error creating marker for node:', node.id, error);
-                }
-            });
+                // Register cleanup for event listeners
+                addCleanup(() => {
+                    if (map.current) {
+                        map.current.off('click', 'node-markers', handleMarkerClick);
+                        map.current.off('mouseenter', 'node-markers', handleMouseEnter);
+                        map.current.off('mouseleave', 'node-markers', handleMouseLeave);
+                    }
+                });
+            } catch (error) {
+                console.error('Error setting up map layers:', error);
+            }
 
             // Call onMapLoad callback if provided
             if (onMapLoad) {
                 onMapLoad(map.current);
             }
-        });
-
-        // Add error handling for map errors
-        map.current.on('error', (e) => {
-            console.error('Mapbox error:', e);
-            // Don't show error in UI as the map should still work
-        });
-
-        // Add network error handler
-        map.current.on('sourcedata', (e) => {
-            if (e.sourceDataType === 'metadata' && e.isSourceLoaded === false) {
-                console.warn('Map source failed to load, but continuing...');
-            }
-        });
-
-        // Cleanup function
-        return () => {
-            if (map.current) {
-                try {
-                    map.current.remove();
-                    map.current = null;
-                } catch (error) {
-                    console.warn('Error cleaning up map:', error);
-                }
-            }
         };
-    }, [onMapLoad, mapboxToken]);
+
+        // Error handler
+        const handleMapError = (e: mapboxgl.ErrorEvent) => {
+            console.error('Mapbox error:', e);
+            console.error('Error details:', {
+                type: e.type,
+                target: e.target,
+                error: e.error,
+            });
+        };
+
+        // Add event listeners
+        map.current.on('load', handleMapLoad);
+        map.current.on('error', handleMapError);
+
+        // Register cleanup for main event listeners
+        addCleanup(() => {
+            if (map.current) {
+                map.current.off('load', handleMapLoad);
+                map.current.off('error', handleMapError);
+            }
+        });
+
+        // Return cleanup function
+        return cleanup;
+    }, [onMapLoad, mapboxToken, hasInvalidToken, cleanup, addCleanup]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return cleanup;
+    }, [cleanup]);
 
     // Render error state if token is missing or invalid
     if (hasTokenError) {
         return (
             <div className={`h-full w-full ${className || ''}`} style={{ minHeight: '400px' }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100%',
-                    background: 'linear-gradient(to bottom, #2F3032, #181819)',
-                    color: '#EDF1FA',
-                    fontFamily: 'Kode Mono, monospace',
-                    textAlign: 'center'
-                }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        background: 'linear-gradient(to bottom, #2F3032, #181819)',
+                        color: '#EDF1FA',
+                        fontFamily: 'Kode Mono, monospace',
+                        textAlign: 'center',
+                    }}
+                >
                     <div>
                         <h2 style={{ fontSize: '18px', marginBottom: '8px' }}>Component Error</h2>
                         <p style={{ fontSize: '14px', opacity: 0.7 }}>Mapbox token prop missing</p>
@@ -311,6 +318,8 @@ const MapboxMap: React.FC<MapboxMapProps> = ({ className, onMapLoad, mapboxToken
     }
 
     return <div ref={mapContainer} className={`h-full w-full ${className || ''}`} style={{ minHeight: '400px' }} />;
-};
+});
+
+MapboxMap.displayName = 'MapboxMap';
 
 export default MapboxMap;

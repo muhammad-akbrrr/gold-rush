@@ -13,10 +13,9 @@ class DashboardController extends Controller
     public function index(): Response
     {
         $mapboxToken = env('VITE_MAPBOX_TOKEN');
-        
+
         // Validate token exists and is properly formatted
         if (empty($mapboxToken) || !str_starts_with($mapboxToken, 'pk.')) {
-            // Log the issue for debugging
             \Log::warning('Invalid or missing Mapbox token in dashboard controller');
             $mapboxToken = null;
         }

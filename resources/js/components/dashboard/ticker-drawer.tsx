@@ -1,6 +1,6 @@
-import { Area, AreaChart, ChartContainer, ChartTooltip, ResponsiveContainer, Tooltip, XAxis, YAxis } from '@/components/ui/chart';
+import { Area, AreaChart, ChartContainer, ChartTooltip, ResponsiveContainer, Tooltip, XAxis, YAxis } from '@/components/dashboard/chart-dashboard';
 import { ArrowUp, ChevronDown, ChevronsUp, Clock, TrendingUp } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 interface TickerData {
     symbol: string;
@@ -35,6 +35,7 @@ const generateChartData = (basePrice: number, isPositive: boolean) => {
     return data;
 };
 
+// Pre-generate chart data to avoid regenerating on every render
 const tickerAssets: TickerData[] = [
     {
         symbol: 'GOLD',
@@ -91,7 +92,7 @@ const newsItems: NewsItem[] = [
 
 const timeFrames = ['1D', '7D', '1M', '1Y', 'All'];
 
-const TickerDrawer: React.FC = () => {
+const TickerDrawer: React.FC = React.memo(() => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [activeAsset, setActiveAsset] = useState(0);
     const [activeTimeFrame, setActiveTimeFrame] = useState('1D');
@@ -100,7 +101,8 @@ const TickerDrawer: React.FC = () => {
         setIsExpanded(!isExpanded);
     };
 
-    const currentAsset = tickerAssets[activeAsset];
+    // Memoize current asset to prevent unnecessary re-renders
+    const currentAsset = useMemo(() => tickerAssets[activeAsset], [activeAsset]);
 
     return (
         <>
@@ -305,6 +307,6 @@ const TickerDrawer: React.FC = () => {
             </div>
         </>
     );
-};
+});
 
 export default TickerDrawer;

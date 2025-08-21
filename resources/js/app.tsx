@@ -18,16 +18,36 @@ gsap.defaults({
     overwrite: 'auto',
 });
 
-const lenis = new Lenis();
+// Initialize Lenis conditionally - avoid on dashboard to prevent memory issues
+let lenis: Lenis | null = null;
 
-// Synchronize Lenis scrolling with GSAP's ScrollTrigger plugin
-lenis.on('scroll', ScrollTrigger.update);
+const initializeLenis = () => {
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('/dashboard')) {
+        lenis = new Lenis();
+        
+        // Synchronize Lenis scrolling with GSAP's ScrollTrigger plugin
+        lenis.on('scroll', ScrollTrigger.update);
 
-gsap.ticker.add((time) => {
-    lenis.raf(time * 1000); // Convert time from seconds to milliseconds
-});
+        gsap.ticker.add((time) => {
+            if (lenis) {
+                lenis.raf(time * 1000); // Convert time from seconds to milliseconds
+            }
+        });
 
-gsap.ticker.lagSmoothing(0);
+        gsap.ticker.lagSmoothing(0);
+    }
+};
+
+// Cleanup function for Lenis
+const cleanupLenis = () => {
+    if (lenis) {
+        lenis.destroy();
+        lenis = null;
+    }
+};
+
+// Initialize Lenis on load
+initializeLenis();
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -36,6 +56,25 @@ createInertiaApp({
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
     setup({ el, App, props }) {
         const root = createRoot(el);
+
+        // Add page change handler to manage Lenis and memory cleanup
+        if (typeof window !== 'undefined') {
+            // Listen for Inertia navigation
+            document.addEventListener('inertia:navigate', () => {
+                cleanupLenis();
+                // Force garbage collection hint (if available)
+                if (window.gc) {
+                    window.gc();
+                }
+                // Delay initialization to ensure DOM is ready
+                setTimeout(initializeLenis, 100);
+            });
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                cleanupLenis();
+            });
+        }
 
         root.render(
             <Web3Provider>
