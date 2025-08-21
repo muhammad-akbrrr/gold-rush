@@ -8,14 +8,15 @@ import { Tools } from '@/components/landing-page/sections/tools';
 import { Trust } from '@/components/landing-page/sections/trust';
 import { Nav } from '@/components/nav';
 import { Head } from '@inertiajs/react';
+import { useEffect } from 'react';
 
 export default function Welcome() {
-    // const { auth } = usePage<SharedData>().props;
-
-    const theme = localStorage.getItem('theme');
-    if (!theme) {
-        document.documentElement.classList.remove('dark'); // default to light
-    }
+    useEffect(() => {
+        const theme = localStorage.getItem('theme');
+        if (!theme) {
+            document.documentElement.classList.remove('dark');
+        }
+    }, []);
 
     return (
         <>

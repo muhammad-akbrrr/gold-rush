@@ -314,30 +314,9 @@ class Web3AuthService implements Web3AuthServiceInterface
     $this->clearRateLimitInternal($walletAddress);
   }
 
-  /**
-   * Generate authentication challenge message
-   */
-  public function generateChallengeMessage(string $walletAddress): string
-  {
-    $timestamp = now()->timestamp;
-    $nonce = bin2hex(random_bytes(16));
 
-    return "Please sign this message to authenticate with your wallet:\n\n" .
-      "Wallet: {$walletAddress}\n" .
-      "Timestamp: {$timestamp}\n" .
-      "Nonce: {$nonce}";
-  }
 
-  /**
-   * Validate challenge message format
-   */
-  public function validateChallengeMessage(string $message): bool
-  {
-    return str_contains($message, 'Please sign this message to authenticate') &&
-      str_contains($message, 'Wallet:') &&
-      str_contains($message, 'Timestamp:') &&
-      str_contains($message, 'Nonce:');
-  }
+
 
   /**
    * Clean up expired sessions

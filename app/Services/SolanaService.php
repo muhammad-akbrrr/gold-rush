@@ -6,6 +6,8 @@ use App\Contracts\SolanaServiceInterface;
 use App\Exceptions\SolanaRpcException;
 use App\Exceptions\InvalidWalletAddressException;
 use App\Models\Web3User;
+use App\Services\BlockiesGeneratorService;
+use App\Services\AvatarStorageService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -17,13 +19,19 @@ class SolanaService implements SolanaServiceInterface
   protected string $tokenMintAddress;
   protected int $minTokenBalance;
   protected int $tokenDecimals;
+  protected BlockiesGeneratorService $blockiesGenerator;
+  protected AvatarStorageService $avatarStorage;
 
-  public function __construct()
-  {
+  public function __construct(
+    BlockiesGeneratorService $blockiesGenerator = null,
+    AvatarStorageService $avatarStorage = null
+  ) {
     $this->rpcUrl = config('web3.rpc_url');
     $this->tokenMintAddress = config('web3.token_mint_address');
     $this->minTokenBalance = config('web3.min_token_balance');
     $this->tokenDecimals = config('web3.token_decimals');
+    $this->blockiesGenerator = $blockiesGenerator ?? new BlockiesGeneratorService();
+    $this->avatarStorage = $avatarStorage ?? new AvatarStorageService();
   }
 
   /**
@@ -82,13 +90,13 @@ class SolanaService implements SolanaServiceInterface
           $account = $data['result']['value'][0];
           $balance = $account['account']['data']['parsed']['info']['tokenAmount']['uiAmount'] ?? 0;
 
-          // Convert to smallest unit (considering decimals)
-          $balanceInSmallestUnit = (int) ($balance * pow(10, $this->tokenDecimals));
+          // uiAmount is already decimal-adjusted, no need to multiply by decimals
+          $humanReadableBalance = (int) $balance;
 
           // Cache the result
-          Cache::put($cacheKey, $balanceInSmallestUnit, $cacheDuration);
+          Cache::put($cacheKey, $humanReadableBalance, $cacheDuration);
 
-          return $balanceInSmallestUnit;
+          return $humanReadableBalance;
         } else {
           // No token account found, balance is 0
           Cache::put($cacheKey, 0, $cacheDuration);
@@ -146,14 +154,26 @@ class SolanaService implements SolanaServiceInterface
         return null;
       }
 
+      // Prepare user data
+      $userData = [
+        'token_balance' => $balance,
+        'last_balance_check' => now(),
+      ];
+
+      // Set display name to wallet address if not provided or empty
+      if (empty($displayName)) {
+        $userData['display_name'] = $walletAddress;
+      } else {
+        $userData['display_name'] = $displayName;
+      }
+
       $user = Web3User::updateOrCreate(
         ['wallet_address' => $walletAddress],
-        [
-          'display_name' => $displayName,
-          'token_balance' => $balance,
-          'last_balance_check' => now(),
-        ]
+        $userData
       );
+
+      // Generate and store avatar if user doesn't have one
+      $this->ensureUserHasAvatar($user);
 
       $user->updateTokenBalance($balance);
 
@@ -161,6 +181,8 @@ class SolanaService implements SolanaServiceInterface
         'wallet_address' => $walletAddress,
         'balance' => $balance,
         'is_authenticated' => $user->is_authenticated,
+        'has_avatar' => !empty($user->avatar_url),
+        'display_name' => $user->display_name,
       ]);
 
       return $user;
@@ -174,13 +196,70 @@ class SolanaService implements SolanaServiceInterface
   }
 
   /**
+   * Ensure user has an avatar, generate one if missing
+   */
+  protected function ensureUserHasAvatar(Web3User $user): void
+  {
+    try {
+      // Skip if user already has an avatar
+      if (!empty($user->avatar_url)) {
+        return;
+      }
+
+      // Check if avatar exists in storage but not in database
+      $existingAvatarUrl = $this->avatarStorage->getAvatarUrl($user->wallet_address);
+      if ($existingAvatarUrl) {
+        $user->update(['avatar_url' => $existingAvatarUrl]);
+        Log::info('Found existing avatar in storage', [
+          'wallet_address' => $user->wallet_address,
+          'avatar_url' => $existingAvatarUrl,
+        ]);
+        return;
+      }
+
+      // Generate new avatar
+      $imageData = $this->blockiesGenerator->generateBlockies($user->wallet_address);
+      if ($imageData === null) {
+        Log::error('Failed to generate blockies avatar', [
+          'wallet_address' => $user->wallet_address,
+        ]);
+        return;
+      }
+
+      // Store avatar and get URL
+      $avatarUrl = $this->avatarStorage->storeAvatar($user->wallet_address, $imageData);
+      if ($avatarUrl === null) {
+        Log::error('Failed to store avatar', [
+          'wallet_address' => $user->wallet_address,
+        ]);
+        return;
+      }
+
+      // Update user with avatar URL
+      $user->update(['avatar_url' => $avatarUrl]);
+
+      Log::info('Generated and stored new avatar', [
+        'wallet_address' => $user->wallet_address,
+        'avatar_url' => $avatarUrl,
+        'image_size' => strlen($imageData),
+      ]);
+
+    } catch (\Exception $e) {
+      Log::error('Exception while ensuring user has avatar', [
+        'wallet_address' => $user->wallet_address,
+        'error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  /**
    * Get token information
    */
   public function getTokenInfo(): array
   {
     return [
       'mint_address' => $this->tokenMintAddress,
-      'min_balance' => $this->minTokenBalance * pow(10, $this->tokenDecimals),
+      'min_balance' => $this->minTokenBalance, // Already in human-readable format
       'decimals' => $this->tokenDecimals,
       'network' => config('web3.network'),
     ];

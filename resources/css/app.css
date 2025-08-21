@@ -1,3 +1,4 @@
+@import url('https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css');
 @import 'tailwindcss';
 
 @plugin 'tailwindcss-animate';
@@ -213,5 +214,15 @@ body {
       0% calc(100% - 10px),
       0% 10px
     );
+  }
+
+  .scrollbar-hide {
+    -webkit-scrollbar: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

@@ -52,15 +52,6 @@ interface Web3AuthServiceInterface
      */
     public function clearRateLimit(string $walletAddress, string $ipAddress): void;
 
-    /**
-     * Generate authentication challenge message
-     */
-    public function generateChallengeMessage(string $walletAddress): string;
-
-    /**
-     * Validate challenge message format
-     */
-    public function validateChallengeMessage(string $message): bool;
 
     /**
      * Clean up expired sessions

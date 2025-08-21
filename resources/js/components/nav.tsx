@@ -1,19 +1,37 @@
 import { useIsMobile } from '@/hooks/use-mobile';
-import { router } from '@inertiajs/react';
+import type { PageProps as InertiaPageProps } from '@inertiajs/core';
+import { router, usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import { BrandLogo } from './brand-logo';
 import { Button } from './landing-page/button';
 import { Link } from './link';
 import { Separator } from './ui/separator';
 
+interface PageProps extends InertiaPageProps {
+    auth?: {
+        web3?: {
+            isAuthenticated: boolean;
+            user?: {
+                walletAddress: string;
+                displayName?: string;
+            };
+        };
+    };
+}
+
 export function Nav() {
+    const { auth } = usePage<PageProps>().props;
+    const isMobile = useIsMobile();
+    const isAuthenticated = auth?.web3?.isAuthenticated || false;
+    const user = auth?.web3?.user;
+
     return (
         <nav className="fixed z-50 flex min-w-screen justify-center bg-foreground py-2 text-background">
             <div className="mx-4 flex w-full items-center justify-between xl:mx-12">
                 <Link href="/">
                     <BrandLogo />
                 </Link>
-                {useIsMobile() ? (
+                {isMobile ? (
                     <>
                         <Button variant="nav" onClick={() => router.visit('/')}>
                             <Menu />
@@ -31,7 +49,16 @@ export function Nav() {
                                 <Link className="text-background">Resources</Link>
                             </li>
                         </ul>
-                        <Button variant="nav">CONNECT YOUR WALLET</Button>
+
+                        {isAuthenticated && user ? (
+                            <Button variant="nav" onClick={() => router.visit(route('dashboard'))}>
+                                GO TO DASHBOARD
+                            </Button>
+                        ) : (
+                            <Button variant="nav" onClick={() => router.visit(route('web3.login.inertia'))}>
+                                CONNECT YOUR WALLET
+                            </Button>
+                        )}
                     </>
                 )}
             </div>
