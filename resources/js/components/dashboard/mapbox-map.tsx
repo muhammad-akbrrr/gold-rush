@@ -217,11 +217,7 @@ const MapboxMap: React.FC<MapboxMapProps> = React.memo(({ className, onMapLoad, 
                 });
 
                 // Click handler for markers
-                const handleMarkerClick = (
-                    e: mapboxgl.MapMouseEvent & {
-                        features?: mapboxgl.MapboxGeoJSONFeature[] | undefined;
-                    },
-                ) => {
+                const handleMarkerClick = () => {
                     // TODO: add click handler here
                 };
 
