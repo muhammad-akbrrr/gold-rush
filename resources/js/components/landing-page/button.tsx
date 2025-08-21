@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 gsap.registerPlugin(useGSAP);
 
@@ -16,75 +17,70 @@ interface ButtonProps {
 }
 
 export function Button(props: ButtonProps) {
+    const isMobile = useIsMobile();
     const { children, onClick, className, variant = 'default' } = props;
 
     const container = useRef<HTMLDivElement>(null);
     const timeline = useRef<gsap.core.Timeline | null>(null);
 
-    useGSAP(
-        () => {
-            const btn = container.current?.querySelector('[data-gsap="btn"]') || null;
-            const label = container.current?.querySelector('[data-gsap="label"]') || null;
-            const labelPseudo = container.current?.querySelector('[data-gsap="label-pseudo"]') || null;
-            const btnBg = container.current?.querySelector('[data-gsap="btn-bg"]') || null;
+    useGSAP(() => {
+        const btn = container.current?.querySelector('[data-gsap="btn"]') || null;
+        const label = container.current?.querySelector('[data-gsap="label"]') || null;
+        const labelPseudo = container.current?.querySelector('[data-gsap="label-pseudo"]') || null;
+        const btnBg = container.current?.querySelector('[data-gsap="btn-bg"]') || null;
+        
+        if (variant === 'nav') {
+            if (isMobile) return; // skip if not mobile
+            timeline.current = gsap.timeline({ paused: true })
+                .to(label, { yPercent: -100 })
+                .to(labelPseudo, { yPercent: -100 }, 0)
+                .to(btnBg, { scaleY: 1 }, 0)
+                .to(btn, { borderColor: 'var(--background)' }, 0);
 
-            if (variant === 'nav') {
-                const hoverIn = () => {
-                    timeline.current = gsap
-                        .timeline()
-                        .to(label, { yPercent: -100 })
-                        .to(labelPseudo, { yPercent: -100 }, 0)
-                        .to(btnBg, { scaleY: 1 }, 0)
-                        .to(btn, { borderColor: 'var(--background)' }, 0);
-                };
+            const hoverIn = () => timeline.current?.play();
+            const hoverOut = () => timeline.current?.reverse();
 
-                const hoverOut = () => timeline.current?.reverse();
+            btn?.addEventListener('mouseenter', hoverIn);
+            btn?.addEventListener('mouseleave', hoverOut);
 
-                btn?.addEventListener('mouseenter', hoverIn);
-                btn?.addEventListener('mouseleave', hoverOut);
+            return () => {
+                btn?.removeEventListener('mouseenter', hoverIn);
+                btn?.removeEventListener('mouseleave', hoverOut);
+            };
+        } else if (variant === 'cta') {
+            timeline.current = gsap.timeline({ paused: true })
+                .to(btnBg, { scaleY: 1, autoAlpha: 1, duration: 1 })
+                .to(label, { yPercent: -100 }, 0)
+                .to(labelPseudo, { yPercent: -100 }, 0);
 
-                return () => {
-                    btn?.removeEventListener('mouseenter', hoverIn);
-                    btn?.removeEventListener('mouseleave', hoverOut);
-                };
-            } else if (variant === 'cta') {
-                const hoverIn = () => {
-                    timeline.current = gsap
-                        .timeline()
-                        .to(btnBg, { scaleY: 1, autoAlpha: 1, duration: 1 })
-                        .to(label, { yPercent: -100 }, 0)
-                        .to(labelPseudo, { yPercent: -100 }, 0);
-                };
+            const hoverIn = () => timeline.current?.play();
+            const hoverOut = () => timeline.current?.reverse();
 
-                const hoverOut = () => timeline.current?.reverse();
+            btn?.addEventListener('mouseenter', hoverIn);
+            btn?.addEventListener('mouseleave', hoverOut);
 
-                btn?.addEventListener('mouseenter', hoverIn);
-                btn?.addEventListener('mouseleave', hoverOut);
+            return () => {
+                btn?.removeEventListener('mouseenter', hoverIn);
+                btn?.removeEventListener('mouseleave', hoverOut);
+            };
+        } else {
+            timeline.current = gsap.timeline({ paused: true })
+                .to(btn, { x: 4, y: 4 })
+                .to(label, { y: -1, duration: 0.1, delay: 0.35 })
+                .to(label, { y: 0, duration: 0.1, delay: 0.4 });
 
-                return () => {
-                    btn?.removeEventListener('mouseenter', hoverIn);
-                    btn?.removeEventListener('mouseleave', hoverOut);
-                };
-            } else {
-                const hoverIn = () => {
-                    timeline.current = gsap
-                        .timeline()
-                        .to(btn, { x: 4, y: 4 })
-                        .to(label, { y: -1, duration: 0.1, delay: 0.35 })
-                        .to(label, { y: 0, duration: 0.1, delay: 0.4 });
-                };
+            const hoverIn = () => timeline.current?.play();
+            const hoverOut = () => timeline.current?.reverse();
 
-                const hoverOut = () => timeline.current?.reverse();
+            btn?.addEventListener('mouseenter', hoverIn);
+            btn?.addEventListener('mouseleave', hoverOut);
 
-                btn?.addEventListener('mouseenter', hoverIn);
-                btn?.addEventListener('mouseleave', hoverOut);
-
-                return () => {
-                    btn?.removeEventListener('mouseenter', hoverIn);
-                    btn?.removeEventListener('mouseleave', hoverOut);
-                };
-            }
-        },
+            return () => {
+                btn?.removeEventListener('mouseenter', hoverIn);
+                btn?.removeEventListener('mouseleave', hoverOut);
+            };
+        }
+    },
         { scope: container },
     );
 
@@ -131,12 +127,12 @@ export function Button(props: ButtonProps) {
             );
         default:
             return (
-                <div ref={container} className="relative max-w-fit">
-                    <div data-gsap="btn-bg" className="absolute top-1 left-1 h-full w-full bg-foreground"></div>
+                <div ref={container} className={cn(className, "relative max-w-fit")}>
+                    <div data-gsap="btn-bg" className={"absolute top-1 left-1 h-full w-full bg-foreground"}></div>
                     <button
                         onClick={onClick}
                         data-gsap="btn"
-                        className={cn(`relative cursor-pointer border border-foreground bg-background px-4 py-2 text-foreground`, className)}
+                        className={cn(`w-full relative cursor-pointer border border-foreground bg-background px-4 py-2 text-foreground`)}
                     >
                         <div data-gsap="label">{children}</div>
                     </button>
