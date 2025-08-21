@@ -1,8 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 import { useGSAP } from "@gsap/react";
-import { use, useRef } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Mission() {
     const container = useRef<HTMLDivElement | null>(null);

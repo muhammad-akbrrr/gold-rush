@@ -6,7 +6,7 @@ import { BrandLogo } from './brand-logo';
 import { Button } from './landing-page/button';
 import { Link } from './link';
 import { Separator } from './ui/separator';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
@@ -30,7 +30,6 @@ export function Nav() {
 
     const container = useRef<HTMLDivElement>(null);
     const timeline = useRef<gsap.core.Timeline | null>(null);
-    const [navOpen, setNavOpen] = useState(false);
 
     useGSAP(() => {
         if (!isMobile) return; // skip if not mobile
@@ -54,7 +53,11 @@ export function Nav() {
         const handleNav = () => {
             console.log('handleNav');
             if (!timeline.current) return;
-            timeline.current.reversed() ? timeline.current.play() : timeline.current.reverse();
+            if (timeline.current.reversed()) {
+                timeline.current.play();
+            } else {
+                timeline.current.reverse();
+            }
         };
 
         navTrigger.addEventListener('click', handleNav);

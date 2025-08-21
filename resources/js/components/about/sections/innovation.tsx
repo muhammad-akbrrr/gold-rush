@@ -22,10 +22,8 @@ export function Innovation() {
                 scrub: true,
             }
         })
-        if (isMobile) {
-        } else {
+        if (!isMobile) {
             tl.fromTo(grid, { yPercent: -100, scale: 2 }, { yPercent: 100, scale: 1, ease: "none" });
-
         }
 
     }, { scope: container })
