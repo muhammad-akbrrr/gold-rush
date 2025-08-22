@@ -1,6 +1,6 @@
 import { HeroSection } from '@/components/about/sections/hero';
-import { Innovation } from '@/components/about/sections/innovation';
 import { Mission } from '@/components/about/sections/mission';
+import { Innovation } from '@/components/about/sections/innovation';
 import { Values } from '@/components/about/sections/values';
 import { Footer } from '@/components/footer';
 import { CTA } from '@/components/landing-page/cta';
