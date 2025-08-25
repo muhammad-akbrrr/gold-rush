@@ -1,0 +1,47 @@
+# Dependencies
+
+/vendor
+/node_modules
+
+# Development files
+
+.env
+.env.local
+.env.example
+phpunit.xml
+pest.xml
+
+# Laravel specific
+
+/storage/app/_
+/storage/framework/cache/_
+/storage/framework/sessions/_
+/storage/framework/views/_
+/storage/logs/_
+/bootstrap/cache/_
+
+# Development and build artifacts
+
+/tests
+
+# IDE files
+
+.vscode
+.idea
+_.swp
+_.swo
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# Git
+
+.git
+.gitignore
+
+# Documentation
+
+README.md
+\*.md

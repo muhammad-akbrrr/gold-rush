@@ -10,9 +10,9 @@ class AvatarStorageService
     protected string $disk;
     protected string $directory;
 
-    public function __construct(string $disk = 'public', string $directory = 'avatars')
+    public function __construct(string $disk = null, string $directory = 'avatars')
     {
-        $this->disk = $disk;
+        $this->disk = $disk ?? config('filesystems.default', 'public');
         $this->directory = $directory;
         
         // Ensure the avatars directory exists

@@ -4,7 +4,7 @@ import laravel from 'laravel-vite-plugin';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -73,13 +73,17 @@ export default defineConfig({
         minify: 'terser',
         terserOptions: {
             compress: {
-                // Remove unused Mapbox GL code
-                drop_console: true,
-                drop_debugger: true,
+                // Remove unused Mapbox GL code in production
+                drop_console: mode === 'production',
+                drop_debugger: mode === 'production',
                 dead_code: true,
                 unused: true,
             },
         },
+        // Vercel-specific output directory and settings
+        outDir: 'public/build',
+        assetsDir: 'assets',
+        sourcemap: mode !== 'production',
     },
     // Optimize development server for memory usage
     server: {
@@ -109,9 +113,9 @@ export default defineConfig({
     define: {
         // Tree-shake unused Mapbox GL features at compile time
         'process.env.MAPBOX_GL_SUPPORTED': 'true',
-        'process.env.NODE_ENV': '"production"',
-        // Disable Mapbox GL debugging and development features
-        '__MAPBOX_GL_DEV__': false,
-        '__MAPBOX_GL_DEBUG__': false,
+        'process.env.NODE_ENV': mode === 'production' ? '"production"' : '"development"',
+        // Disable Mapbox GL debugging and development features in production
+        '__MAPBOX_GL_DEV__': mode !== 'production',
+        '__MAPBOX_GL_DEBUG__': mode !== 'production',
     },
-});
+}));
