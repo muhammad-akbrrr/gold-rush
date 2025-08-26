@@ -1,10 +1,11 @@
 'use client';
 import { router } from '@inertiajs/react';
+import type { VisitOptions } from '@inertiajs/core';
 import gsap from 'gsap';
 import { useCallback } from 'react';
 
 export function usePageExit() {
-    return useCallback(async (href: string, options: any = {}) => {
+    return useCallback(async (href: string, options: VisitOptions = {}) => {
         const hole = document.querySelector<SVGPathElement>('#hole-path');
         const windowHeight = window.innerHeight;
 
