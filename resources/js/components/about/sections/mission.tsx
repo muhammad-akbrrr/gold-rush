@@ -1,7 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
-import ScrollTrigger from "gsap/ScrollTrigger";
 import gsap from "gsap";
 import { useIsMobile } from "@/hooks/use-mobile";
 

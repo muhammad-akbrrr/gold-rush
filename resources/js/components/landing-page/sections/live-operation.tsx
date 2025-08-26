@@ -106,7 +106,7 @@ export const LiveOperation = () => {
                 </div>
                 <div ref={container} className="relative col-span-8 bg-foreground p-4 lg:p-24 flex items-center justify-center order-first lg:order-last overflow-hidden">
                     <InteractiveGridPattern className="map-grid w-full h-full absolute inset-0 m-auto opacity-20" width={gridSize} height={gridSize} />
-                    <Map className="map w-full h-auto m-auto pointer-events-none" />
+                    <Map/>
                 </div>
             </div>
             <Separator></Separator>

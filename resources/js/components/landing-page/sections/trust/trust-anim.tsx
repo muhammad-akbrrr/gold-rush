@@ -1,7 +1,7 @@
 import { Alignment, Fit, Layout, useRive } from '@rive-app/react-webgl2';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface TrustAnimProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;

@@ -1,10 +1,6 @@
-interface MapProps {
-    className?: string
-}
-
-export const Map = ({ className }: MapProps) => {
+export const Map = () => {
     return (
-        <svg className="map" viewBox="0 0 1066 666" fill="none" xmlns="http://www.w3.org/2000/svg" xlinkHref="http://www.w3.org/1999/xlink">
+        <svg className="map pointer-events-none" viewBox="0 0 1066 666" fill="none" xmlns="http://www.w3.org/2000/svg" xlinkHref="http://www.w3.org/1999/xlink">
             <rect width="1066" height="666" fill="url(#pattern0_560_100)" />
             <g filter="url(#filter0_f_560_100)">
                 <path d="M668 310C668 310 601.321 313.095 563.5 301C532.374 291.046 511.742 267.029 490 261C446.633 248.974 405.423 250.791 405.423 250.791" stroke="#FCFEA1" stroke-width="3" />
