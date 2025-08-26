@@ -87,11 +87,11 @@ export function Button(props: ButtonProps) {
     switch (variant) {
         case 'nav':
             return (
-                <div ref={container} className="relative max-w-fit">
+                <div ref={container} className={cn("relative max-w-fit", className)}>
                     <button
                         onClick={onClick}
                         data-gsap="btn"
-                        className={cn(`btn relative flex cursor-pointer border border-foreground bg-background px-4 py-2 text-foreground`, className)}
+                        className={cn(`btn relative flex cursor-pointer border border-foreground bg-background px-4 py-2 text-foreground`)}
                     >
                         <div data-gsap="btn-bg" className="absolute inset-0 m-auto origin-bottom scale-y-0 bg-foreground"></div>
                         <div className="relative overflow-hidden">
@@ -127,12 +127,12 @@ export function Button(props: ButtonProps) {
             );
         default:
             return (
-                <div ref={container} className={cn(className, "relative max-w-fit")}>
+                <div ref={container} className={cn("relative max-w-fit", className)}>
                     <div data-gsap="btn-bg" className={"absolute top-1 left-1 h-full w-full bg-foreground"}></div>
                     <button
                         onClick={onClick}
                         data-gsap="btn"
-                        className={cn(`w-full relative cursor-pointer border border-foreground bg-background px-4 py-2 text-foreground`)}
+                        className={cn(`w-full relative cursor-pointer border border-foreground bg-background px-4 py-2 text-foreground uppercase`)}
                     >
                         <div data-gsap="label">{children}</div>
                     </button>

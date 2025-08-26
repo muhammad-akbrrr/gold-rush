@@ -17,11 +17,16 @@ gsap.registerPlugin(ScrollTrigger);
 export const HeroSection = () => {
 
     const container = useRef(null);
-    const [gridSize, setGridSize] = useState<number>(0);
+    const [gridSize, setGridSize] = useState<number>(12);
     const isMobile = useIsMobile();
 
     useEffect(() => {
-        setGridSize(window.innerWidth / (isMobile ? 5 : 12));
+        const handleResize = () => {
+            setGridSize(window.innerWidth / (isMobile ? 5 : 12));
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, [isMobile]);
 
     useGSAP(() => {

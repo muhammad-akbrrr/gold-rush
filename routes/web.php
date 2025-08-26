@@ -11,7 +11,7 @@ Route::get('/', function () {
 
 Route::get('/about', function () {
     return Inertia::render('about');
-});
+})->name('about');
 
 // Public Web3 API Routes (no authentication required)
 Route::prefix('web3')->group(function () {

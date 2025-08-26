@@ -9,6 +9,8 @@ import { Separator } from './ui/separator';
 import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { usePageExit } from '@/lib/use-page-exit';
+import { cn } from '@/lib/utils';
 
 interface PageProps extends InertiaPageProps {
     auth?: {
@@ -24,9 +26,11 @@ interface PageProps extends InertiaPageProps {
 
 export function Nav() {
     const { auth } = usePage<PageProps>().props;
+    const { component } = usePage();
     const isMobile = useIsMobile();
     const isAuthenticated = auth?.web3?.isAuthenticated || false;
     const user = auth?.web3?.user;
+    const pageExit = usePageExit();
 
     const container = useRef<HTMLDivElement>(null);
     const timeline = useRef<gsap.core.Timeline | null>(null);
@@ -48,7 +52,9 @@ export function Nav() {
             .to(navTrigger, { borderColor: "var(--background)" }, 0)
             .to(icon, { color: "var(--background)" }, 0)
             .to(overlay, { autoAlpha: 1 }, 0)
-            .to('html', { overflow: 'hidden', height: '100vh' }, 0);
+            .reverse();
+
+        // .to('html', { overflow: 'hidden', height: '100vh' }, 0);
 
         const handleNav = () => {
             console.log('handleNav');
@@ -62,12 +68,15 @@ export function Nav() {
 
         navTrigger.addEventListener('click', handleNav);
         return () => navTrigger.removeEventListener('click', handleNav);
-    }, { scope: container });
+    }, { scope: container, dependencies: [isMobile] });
 
     return (
         <nav ref={container} className="fixed z-50 flex min-w-screen justify-center bg-foreground text-background">
             <div className="bg-foreground mx-4 flex w-full items-center justify-between py-2 xl:mx-12">
-                <Link href="/">
+                <Link onClick={() => {
+                    if (component === "welcome") return;
+                    pageExit(route("home"))
+                }}>
                     <BrandLogo />
                 </Link>
                 {isMobile ? (
@@ -85,7 +94,12 @@ export function Nav() {
                     <>
                         <ul className="flex flex-1 items-center justify-around gap-8 text-lg">
                             <li>
-                                <Link className="text-background" href="/about">
+                                <Link
+                                    className={cn("text-background", { "font-bold": component === "about" })}
+                                    onClick={() => {
+                                        if (component === "about") return;
+                                        pageExit(route("about"))
+                                    }}>
                                     About
                                 </Link>
                             </li>
@@ -118,18 +132,21 @@ export function Nav() {
                             <Separator />
                             <li className='w-full'>
                                 {isAuthenticated && user ? (
-                                    <Button className='flex items-center uppercase max-w-none' onClick={() => router.visit(route('dashboard'))}>
+                                    <Button className='w-full flex items-center uppercase max-w-full' onClick={() => router.visit(route('dashboard'))}>
                                         Go to dashboard
                                     </Button>
                                 ) : (
-                                    <Button className='flex items-center uppercase max-w-none' onClick={() => router.visit(route('web3.login.inertia'))}>
+                                    <Button className='w-full flex items-center uppercase max-w-full' onClick={() => router.visit(route('web3.login.inertia'))}>
                                         Connect your wallet
                                     </Button>
                                 )
                                 }
                             </li>
                             <li>
-                                <Link className="text-background text-xl" href="/about">
+                                <Link className="text-background" onClick={() => {
+                                    if (component === "about") return;
+                                    pageExit(route("about"))
+                                }}>
                                     About
                                 </Link>
                             </li>
