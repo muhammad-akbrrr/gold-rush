@@ -184,9 +184,11 @@ export const IntelligenceHub = () => {
 
     useEffect(() => {
         const section = document.querySelector('#intelligence-hub');
-        const riveColumn = section?.querySelector('.rive-column')
+        const riveColumn = section?.querySelector('.rive-column');
 
-        setGridSize((riveColumn?.clientWidth || 24) / 5)
+        if (!riveColumn) return;
+
+        setGridSize((riveColumn.clientWidth || 24) / 5)
     }, [isMobile])
 
     return (

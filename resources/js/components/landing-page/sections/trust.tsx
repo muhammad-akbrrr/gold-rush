@@ -19,7 +19,9 @@ export const Trust = () => {
     const container = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
-        const trustAnim = container.current?.querySelector('[data-gsap="trust-anim"]') || null;
+        const trustAnim = container.current?.querySelector('[data-gsap="trust-anim"]');
+
+        if (!trustAnim) return;
 
         gsap.timeline({
             scrollTrigger: {
