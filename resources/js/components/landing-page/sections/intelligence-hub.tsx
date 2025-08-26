@@ -180,7 +180,7 @@ export const IntelligenceHub = () => {
             removers.forEach(fn => fn());
             descSplits.forEach(s => s.revert());
         };
-    }, { scope: riveContainer })
+    }, { scope: riveContainer, dependencies: [isMobile]},)
 
     useEffect(() => {
         const section = document.querySelector('#intelligence-hub');
@@ -329,7 +329,7 @@ export const IntelligenceHub = () => {
                             })}
                         </div>
                     </div>
-                    {!isMobile &&
+                    {!isMobile && 
                         <>
                             <div className="relative">
                                 {imgSrc.map((src, index) => {
