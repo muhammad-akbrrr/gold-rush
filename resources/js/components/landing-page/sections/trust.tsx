@@ -46,7 +46,7 @@ export const Trust = () => {
             .from(trustAnim, { yPercent: -100, ease: "none" })
 
 
-    }, { scope: container, dependencies: [isMobile] });
+    }, { scope: container});
 
 
     return (
