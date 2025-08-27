@@ -3,7 +3,6 @@ import { BrandName } from "./brand-name";
 import { InteractiveGridPattern } from "./magicui/interactive-grid-pattern";
 import { Separator } from "./ui/separator";
 import { useGSAP } from "@gsap/react";
-
 import gsap from "gsap";
 import { Link } from "./link";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,8 +12,13 @@ export const Footer = () => {
     const isMobile = useIsMobile();
 
     useEffect(() => {
-        setGridSize(window.innerWidth / (isMobile ? 6 : 12));
-    }, [isMobile])
+        const handleResize = () => {
+            setGridSize(window.innerWidth / (isMobile ? 6 : 12));
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [isMobile]);
 
     const container = useRef<HTMLDivElement>(null);
 
@@ -31,27 +35,28 @@ export const Footer = () => {
                 trigger: section,
                 start: 'top bottom',
                 end: 'bottom bottom',
-                scrub: true
+                scrub: true,
+                // invalidateOnRefresh: true
             },
             defaults: { ease: 'none' }
         })
-            .from(grid, { yPercent: -150 })
+            .fromTo(grid, { yPercent: -150 }, { yPercent: 0 }, 0)
 
         gsap.timeline({
             scrollTrigger: {
                 trigger: titleWrap,
                 start: 'top bottom',
                 end: 'bottom top+=44rem',
-                // toggleActions: 'play none none reverse',
-                scrub: true
+                scrub: true,
+                // invalidateOnRefresh: true
             },
             defaults: { duration: 1 }
         })
-            .from(titleWrap, { height: 0 })
-            .from(title, { yPercent: -100, duration: 1 }, 0)
-            .from(desc, { autoAlpha: 0, duration: 1 }, 0)
+            .fromTo(titleWrap, { height: 0 }, { height: 'auto' }, 0)
+            .fromTo(title, { yPercent: -100 }, { yPercent: 0, duration: 1 }, 0)
+            .fromTo(desc, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1 }, 0)
 
-    }, { scope: container })
+    }, { scope: container, dependencies: [isMobile] })
 
     return (
         <footer ref={container} className="relative flex flex-col justify-between min-h-screen overflow-hidden text-muted-foreground">

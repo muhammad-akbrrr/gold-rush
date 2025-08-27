@@ -6,7 +6,7 @@ interface BrandNameProps {
 
 export const BrandName = ({ className }: BrandNameProps) => {
     return (
-        <svg className={cn("h-auto", className)} viewBox="0 0 1824 171" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className={cn("w-full", className)} viewBox="0 0 1824 171" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21.8576 4.75H92.6574L112.139 33.9625L93.1326 53.2L78.64 31.5875H33.0241L28.7476 36.1V134.9L34.6871 144.163H86.0051V95.7125H52.5059V69.1125H102.636L114.515 87.1625V171H20.4321L0 140.363V27.55L21.8576 4.75Z" fill="#47484B" />
             <path d="M164.552 4.75H236.065L256.972 36.575V148.2L235.352 171H164.077L142.457 139.175V27.55L164.552 4.75ZM171.205 133.95L178.095 144.163H223.711L228.225 139.413V41.8L221.335 31.5875H175.481L171.205 36.3375V133.95Z" fill="#47484B" />
             <path d="M284.677 4.75H313.424V133.475L320.789 144.163H370.919V126.825H399.667V171H306.297L284.677 138.225V4.75Z" fill="#47484B" />

@@ -14,12 +14,18 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Reputation = () => {
 
+    const isMobile = useIsMobile();
     const container = useRef<HTMLDivElement>(null);
     const [gridSize, setGridSize] = useState<number>(0);
 
     useEffect(() => {
-        setGridSize(window.innerWidth / 2 / 5)
-    }, [])
+        const handleResize = () => {
+            setGridSize(window.innerWidth / 2 / 5)
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [isMobile])
 
     useGSAP(() => {
         const textWrapper = container.current?.querySelector('.text-wrapper') as HTMLDivElement;

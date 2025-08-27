@@ -2,19 +2,31 @@ import { Separator } from "@/components/ui/separator"
 import { Map } from "./live-operation/map"
 
 import { useGSAP } from '@gsap/react';
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from 'gsap';
 import ScrollTrigger from "gsap/ScrollTrigger";
 import DrawSVGPlugin from "gsap/DrawSVGPlugin";
 import { InteractiveGridPattern } from "@/components/magicui/interactive-grid-pattern";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
 export const LiveOperation = () => {
     const container = useRef<HTMLDivElement>(null);
+    const isMobile = useIsMobile();
+
+    const [gridSize, setGridSize] = useState<number>(0);
+
+    useEffect(() => {
+        setGridSize(window.innerWidth / (isMobile ? 5 : 12));
+    }, [isMobile]);
 
     useGSAP(() => {
-        const map = container.current?.querySelector('.map') as HTMLOrSVGElement | null;
+        const map = container.current?.querySelector('.map');
+
+        if (!map) return;
+
+        gsap.set('.dots', { willChange: 'opacity' })
 
         const ctx = gsap.context(() => {
             // Map axis
@@ -39,14 +51,14 @@ export const LiveOperation = () => {
                 },
                 defaults: { ease: 'none' }
             })
-                .from('.map .dots path', {
-                    autoAlpha: 0,
-                    duration: 1,
-                    stagger: {
-                        from: 'random',
-                        each: .05
-                    }
-                }, 0)
+                // .from('.map .dots path', {
+                //     autoAlpha: 0,
+                //     duration: 1,
+                //     stagger: {
+                //         from: 'random',
+                //         each: .05
+                //     }
+                // }, 0)
 
 
             // Paper animation
@@ -60,7 +72,7 @@ export const LiveOperation = () => {
             })
                 .from('.paper-1', { autoAlpha: 0, rotate: -7 })
                 .from('.paper-2', { autoAlpha: 0, rotate: 8 }, 0)
-                .from('.map .strings path', { autoAlpha: 0, drawSVG: 0}, 0.1)
+                .from('.map .strings path', { autoAlpha: 0, drawSVG: 0 }, 0.1)
         }, container)
 
 
@@ -93,8 +105,8 @@ export const LiveOperation = () => {
                     </div>
                 </div>
                 <div ref={container} className="relative col-span-8 bg-foreground p-4 lg:p-24 flex items-center justify-center order-first lg:order-last overflow-hidden">
-                    <InteractiveGridPattern className="map-grid w-full h-full absolute inset-0 m-auto opacity-20" squares={[48, 48]}/>
-                    <Map className="map w-full h-auto m-auto pointer-events-none" />
+                    <InteractiveGridPattern className="map-grid w-full h-full absolute inset-0 m-auto opacity-20" width={gridSize} height={gridSize} />
+                    <Map/>
                 </div>
             </div>
             <Separator></Separator>

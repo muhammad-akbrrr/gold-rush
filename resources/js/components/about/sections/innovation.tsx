@@ -26,7 +26,7 @@ export function Innovation() {
             tl.fromTo(grid, { yPercent: -100, scale: 2 }, { yPercent: 100, scale: 1, ease: "none" });
         }
 
-    }, { scope: container })
+    }, { scope: container, dependencies: [isMobile] })
 
     return (
         <section ref={container}
@@ -39,11 +39,13 @@ export function Innovation() {
                     Project Gold Rush was founded by [Your Company Name], a registered Swiss entity. Our international team is a collective of engineers, designers, and data scientists united by a passion for community, innovation, and decentralized technology. We are inspired by the idea that human collaboration, when amplified by advanced tools, can solve complex challenges and create tangible, real-world value.
                 </div>
             </div>
-            <Separator className={ isMobile ? "w-full order-1" : "absolute h-full inset-0 m-auto" }
+            <Separator className={isMobile ? "w-full order-1" : "absolute h-full inset-0 m-auto"}
                 orientation={isMobile ? "horizontal" : "vertical"}
             />
             <div data-gsap="grid-container" className="relative flex-1 overflow-hidden border-l border-border bg-background">
-                <Grid className="absolute w-full h-auto left-[calc(50%-1px)] top-1/2 -translate-1/2" variant="swiss" />
+                <div className="absolute w-full h-full">
+                    <Grid className="w-full h-auto" variant="swiss" />
+                </div>
             </div>
         </section>
     )

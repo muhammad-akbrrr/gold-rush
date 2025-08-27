@@ -19,7 +19,9 @@ export const Trust = () => {
     const container = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
-        const trustAnim = container.current?.querySelector('[data-gsap="trust-anim"]') || null;
+        const trustAnim = container.current?.querySelector('[data-gsap="trust-anim"]');
+
+        if (!trustAnim) return;
 
         gsap.timeline({
             scrollTrigger: {
@@ -44,7 +46,7 @@ export const Trust = () => {
             .from(trustAnim, { yPercent: -100, ease: "none" })
 
 
-    }, { scope: container });
+    }, { scope: container});
 
 
     return (
@@ -56,7 +58,7 @@ export const Trust = () => {
             <Separator className="grow-0" />
             <div className="relative h-full w-full px-4 md:px-12 pt-12 overflow-hidden">
                 <InteractiveGridPattern width={gridSize} height={gridSize} className="w-full h-full" />
-                <TrustAnim data-gsap="trust-anim" className="absolute left-0 -top-10 xl:top-0 w-full h-full xl:h-[50svh] xl:max-h-11/12 xl:-translate-x-[2.1%] touch-pan-y" />
+                <TrustAnim data-gsap="trust-anim" className="absolute left-0 -top-10 xl:top-0 w-full h-full xl:h-[50svh] xl:max-h-11/12 touch-pan-y" />
             </div>
         </section>
     );
