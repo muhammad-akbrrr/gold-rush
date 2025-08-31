@@ -11,7 +11,6 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { usePageExit } from '@/lib/use-page-exit';
-import { cn } from '@/lib/utils';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,7 +35,6 @@ export function Nav() {
     const pageExit = usePageExit();
 
     const container = useRef<HTMLDivElement>(null);
-    const timeline = useRef<gsap.core.Timeline | null>(null);
 
     useGSAP(() => {
         // if (!isMobile) return; // skip if not mobile
@@ -107,7 +105,7 @@ export function Nav() {
             const brandST = ScrollTrigger.create({
                 start: 0,
                 end: 'max',
-                onUpdate: (self) => {
+                onUpdate: () => {
                     if (window.scrollY > 24) {
                         collapse.play();
                     } else {
