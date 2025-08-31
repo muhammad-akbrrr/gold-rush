@@ -26,7 +26,7 @@ export const Trust = () => {
         gsap.timeline({
             scrollTrigger: {
                 trigger: container.current,
-                start: isMobile ? "top top+=56rem" : "top top+=44rem",
+                start: isMobile ? "top top+=56rem" : "top top",
                 end: "bottom top",
                 scrub: true,
                 pin: true,
@@ -44,8 +44,6 @@ export const Trust = () => {
             }
         })
             .from(trustAnim, { yPercent: -100, ease: "none" })
-
-
     }, { scope: container});
 
 
