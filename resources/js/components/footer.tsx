@@ -4,7 +4,7 @@ import { InteractiveGridPattern } from "./magicui/interactive-grid-pattern";
 import { Separator } from "./ui/separator";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Link } from "./link";
+import { NavLink } from "./nav-link";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Footer = () => {
@@ -75,43 +75,43 @@ export const Footer = () => {
                 <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
                     <li className="text-base xl:text-xl font-bold">Resources</li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Litepaper</Link>
+                        <NavLink className="text-sm xl:text-lg">Litepaper</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Roadmap</Link>
+                        <NavLink className="text-sm xl:text-lg">Roadmap</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Media Kit</Link>
+                        <NavLink className="text-sm xl:text-lg">Media Kit</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">FAQ</Link>
+                        <NavLink className="text-sm xl:text-lg">FAQ</NavLink>
                     </li>
                 </ul>
                 <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
                     <li className="text-base xl:text-xl font-bold">Community</li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Discord</Link>
+                        <NavLink className="text-sm xl:text-lg">Discord</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Twitter (X)</Link>
+                        <NavLink className="text-sm xl:text-lg">Twitter (X)</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Telegram</Link>
+                        <NavLink className="text-sm xl:text-lg">Telegram</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Medium</Link>
+                        <NavLink className="text-sm xl:text-lg">Medium</NavLink>
                     </li>
                 </ul>
                 <ul className="space-y-2 md:space-y-4 py-4 mx-4 xl:mx-12">
                     <li className="text-base xl:text-xl font-bold">Legal</li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Privacy Policy</Link>
+                        <NavLink className="text-sm xl:text-lg">Privacy Policy</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Terms and Conditions</Link>
+                        <NavLink className="text-sm xl:text-lg">Terms and Conditions</NavLink>
                     </li>
                     <li>
-                        <Link className="text-sm xl:text-lg">Contact Us</Link>
+                        <NavLink className="text-sm xl:text-lg">Contact Us</NavLink>
                     </li>
                 </ul>
                 <Separator className="absolute bottom-0" />

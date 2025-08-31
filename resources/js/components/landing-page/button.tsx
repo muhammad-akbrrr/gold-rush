@@ -14,11 +14,12 @@ interface ButtonProps {
     onClick?: () => void;
     className?: string;
     variant?: string;
+    disabled?: boolean;
 }
 
 export function Button(props: ButtonProps) {
     const isMobile = useIsMobile();
-    const { children, onClick, className, variant = 'default' } = props;
+    const { children, onClick, className, variant = 'default', disabled } = props;
 
     const container = useRef<HTMLDivElement>(null);
     const timeline = useRef<gsap.core.Timeline | null>(null);
@@ -28,7 +29,7 @@ export function Button(props: ButtonProps) {
         const label = container.current?.querySelector('[data-gsap="label"]') || null;
         const labelPseudo = container.current?.querySelector('[data-gsap="label-pseudo"]') || null;
         const btnBg = container.current?.querySelector('[data-gsap="btn-bg"]') || null;
-        
+
         if (variant === 'nav') {
             if (isMobile) return; // skip if not mobile
             timeline.current = gsap.timeline({ paused: true })
@@ -87,16 +88,22 @@ export function Button(props: ButtonProps) {
     switch (variant) {
         case 'nav':
             return (
-                <div ref={container} className={cn("relative max-w-fit", className)}>
+                <div ref={container} className={cn("relative max-w-fit", disabled && "pointer-events-none", className)}>
                     <button
                         onClick={onClick}
                         data-gsap="btn"
-                        className={cn(`btn relative flex cursor-pointer border border-foreground bg-background px-4 py-2 text-foreground`)}
+                        className={cn(
+                            "btn relative flex cursor-pointer border border-foreground bg-amber-400 px-4 py-3 text-foreground",
+                            disabled && "bg-neutral-300 border-neutral-500"
+                        )}
                     >
                         <div data-gsap="btn-bg" className="absolute inset-0 m-auto origin-bottom scale-y-0 bg-foreground"></div>
                         <div className="relative overflow-hidden">
-                            <div data-gsap="label">{children}</div>
-                            <div data-gsap="label-pseudo" className="absolute top-1/2 right-0 left-0 mx-auto translate-y-1/2 text-background">
+                            <div data-gsap="label" className={disabled ? "text-neutral-500" : ""}>{children}</div>
+                            <div data-gsap="label-pseudo" className={cn(
+                                "absolute top-1/2 right-0 left-0 mx-auto translate-y-1/2 text-background",
+                                disabled && "text-neutral-500"
+                            )}>
                                 {children}
                             </div>
                         </div>

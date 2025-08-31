@@ -4,9 +4,18 @@
 @plugin 'tailwindcss-animate';
 
 @source '../views';
+@source '../js/**/*.{js,jsx,ts,tsx}';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: "Neo Externo";
+  src: url("/font/neo-externo.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
     --font-sans:
