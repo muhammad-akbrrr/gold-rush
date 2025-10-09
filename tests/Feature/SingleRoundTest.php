@@ -59,7 +59,7 @@ test('Single Asset Round Tests', function () {
         return PublicKey::findProgramAddressSync(['bet', $roundPda->toBinaryString(), $betIdSeed], $programId)[0];
     };
 
-    $deriveUserTokenAccount = function (PublicKey $userPubkey, PublicKey $mint): PublicKey {
+    $deriveTokenAccount = function (PublicKey $userPubkey, PublicKey $mint): PublicKey {
         // Associated Token Account PDA
         $tokenProgramId = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
         $associatedTokenProgramId = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
@@ -413,11 +413,17 @@ test('Single Asset Round Tests', function () {
     $programId = $toPublicKey($requireEnv('PROGRAM_ID'));
     $systemProgramId = $toPublicKey($requireEnv('SYSTEM_PROGRAM_ID'));
     $tokenProgramId = $toPublicKey($requireEnv('TOKEN_PROGRAM_ID'));
+    $associatedTokenProgramId = $toPublicKey($requireEnv('ASSOCIATED_TOKEN_PROGAM_ID'));
     $mint = $toPublicKey($requireEnv('TOKEN_MINT'));
     $admin = $loadKeypairFromJsonFile($requireEnv('ADMIN_KEYPAIR_PATH'));
     $keeper = $loadKeypairFromJsonFile($requireEnv('KEEPER_KEYPAIR_PATH'));
+    $treasury = $loadKeypairFromJsonFile($requireEnv('TREASURY_KEYPAIR_PATH'));
     $user = $loadKeypairFromJsonFile($requireEnv('USER_KEYPAIR_PATH'));
     $goldPriceFeedId = $requireEnv('GOLD_PRICE_FEED_ID');
+
+    // Token account
+    $userTokenAccount = $deriveTokenAccount($user->getPublicKey(), $mint);
+    $treasuryTokenAccount = $deriveTokenAccount($treasury->getPublicKey(), $mint);
 
     // Debug environment
     echo "Program ID: " . $programId->toBase58() . "\n";
@@ -522,7 +528,7 @@ test('Single Asset Round Tests', function () {
 
     // Context accounts
     $keys = [
-        new AccountMeta($admin->getPublicKey(), true, true),
+        new AccountMeta($keeper->getPublicKey(), true, true),
         new AccountMeta($configPda, false, true),
         new AccountMeta($roundPda, false, true),
         new AccountMeta($goldPriceFeedAccount, false, false),
@@ -532,15 +538,15 @@ test('Single Asset Round Tests', function () {
     // Instruction
     $ix = new TransactionInstruction($programId, $keys, $startRoundData);
     $tx = new Transaction();
-    $tx->feePayer = $admin->getPublicKey();
+    $tx->feePayer = $keeper->getPublicKey();
     $tx->add($ix);
 
     // Retry configuration
-    $maxWaitMs = 20000; // 20 seconds
-    $pollIntervalMs = 1000; // 1 second
+    $maxWaitMs = 20_000; // 20 seconds
+    $pollIntervalMs = 1_000; // 1 second
     $maxRetries = 20;
     $retryCount = 0;
-    $startTime = microtime(true) * 1000;
+    $startTime = microtime(true) * 1_000;
 
     // Retry loop for PythError and RoundNotReadyForStart
     while (true) {
@@ -552,7 +558,7 @@ test('Single Asset Round Tests', function () {
             $tx->recentBlockhash = $recentBlockhash['blockhash'];
 
             // Simulate transaction first
-            $simResult = $conn->simulateTransaction($tx, [$admin]);
+            $simResult = $conn->simulateTransaction($tx, [$keeper]);
             echo "Start Round Simulation Result: " . json_encode($simResult) . "\n";
 
             // Check for specific errors in simulation
@@ -568,18 +574,18 @@ test('Single Asset Round Tests', function () {
                         throw new Exception('Timed out waiting for pyth error to resolve after ' . $maxRetries . ' attempts');
                     }
                     echo "PythError detected in logs (attempt {$retryCount}/{$maxRetries}), waiting {$pollIntervalMs}ms...\n";
-                    usleep($pollIntervalMs * 1000);
+                    usleep($pollIntervalMs * 1_000);
                     continue;
                 }
 
                 // Check for RoundNotReadyForStart in logs
                 if (strpos($logsString, 'RoundNotReadyForStart') !== false) {
-                    $currentTime = microtime(true) * 1000;
+                    $currentTime = microtime(true) * 1_000;
                     if ($currentTime - $startTime > $maxWaitMs) {
-                        throw new Exception('Timed out waiting for round to be ready after ' . ($maxWaitMs / 1000) . ' seconds');
+                        throw new Exception('Timed out waiting for round to be ready after ' . ($maxWaitMs / 1_000) . ' seconds');
                     }
                     echo "RoundNotReadyForStart detected in logs, waiting {$pollIntervalMs}ms...\n";
-                    usleep($pollIntervalMs * 1000);
+                    usleep($pollIntervalMs * 1_000);
                     continue;
                 }
 
@@ -588,7 +594,7 @@ test('Single Asset Round Tests', function () {
             }
 
             // If simulation successful, send transaction
-            $sig = $conn->sendTransaction($tx, [$admin]);
+            $sig = $conn->sendTransaction($tx, [$keeper]);
             echo "Start Round Transaction: " . $rpcUrl . '?sig=' . $sig . "\n";
             expect(is_string($sig))->toBeTrue();
             expect(strlen($sig))->toBeGreaterThan(10);
@@ -651,9 +657,6 @@ test('Single Asset Round Tests', function () {
     // Derive bet PDA
     $betPda = $deriveBetPda($programId, $roundPda, $nextBetId);
 
-    // Derive user token account
-    $userTokenAccount = $deriveUserTokenAccount($user->getPublicKey(), $mint);
-
     // Arguments
     $amount = 10_000_000;
     $direction = 0; // up
@@ -707,6 +710,7 @@ test('Single Asset Round Tests', function () {
         } else {
             throw new Exception('Place Bet Simulation failed: ' . json_encode($simResult['value']['err']));
         }
+
         expect(is_string($sig))->toBeTrue();
         expect(strlen($sig))->toBeGreaterThan(10);
     } catch (Exception $e) {
@@ -718,6 +722,97 @@ test('Single Asset Round Tests', function () {
     /// -- 4. SETTLE SINGLE ROUND (loop until can settle) --
     // Instruction: settleSingleRound
     // Discriminator: [136, 196, 251, 236, 219, 255, 108, 43]
+
+    // Build data
+    $settleRoundDiscriminator = chr(136) . chr(196) . chr(251) . chr(236) . chr(219) . chr(255) . chr(108) . chr(43);
+    $settleRoundData = $settleRoundDiscriminator;
+
+    // Context accounts
+    $keys = [
+        new AccountMeta($keeper->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, false),
+        new AccountMeta($roundPda, false, true),
+        new AccountMeta($vaultPda, false, true),
+        new AccountMeta($goldPriceFeedAccount, false, false),
+        new AccountMeta($treasury->getPublicKey(), false, false),
+        new AccountMeta($treasuryTokenAccount, false, true),
+        new AccountMeta($mint, false, false),
+        new AccountMeta($tokenProgramId, false, false),
+        new AccountMeta($associatedTokenProgramId, false, false),
+        new AccountMeta($systemProgramId, false, false),
+    ];
+
+    // Remaining accounts
+    $betAccounts = [];
+    $round = $fetchRoundAccount($conn, $roundPda);
+    for ($i = 1; $i <= $round->totalBets; $i++) {
+        $bPda = $deriveBetPda($programId, $roundPda, $i);
+        $betAccounts[] = new AccountMeta($bPda, false, true);
+    }
+    $keys = array_merge($keys, $betAccounts);
+
+    // Instruction
+    $ix = new TransactionInstruction($programId, $keys, $settleRoundData);
+    $tx = new Transaction();
+    $tx->feePayer = $keeper->getPublicKey();
+    $tx->add($ix);
+
+    // Retry configuration
+    $maxWaitMs = 40_000; // 40 seconds
+    $pollIntervalMs = 1_000; // 1 second
+    $maxRetries = 40;
+    $retryCount = 0;
+    $startTime = microtime(true) * 1_000;
+
+    // Retry loop for RoundNotReadyForSettle
+    while (true) {
+        try {
+            // Recent blockhash
+            $recentBlockhash = $conn->getRecentBlockhash();
+            $tx->recentBlockhash = $recentBlockhash['blockhash'];
+
+            // Simulate transaction
+            $simResult = $conn->simulateTransaction($tx, [$keeper]);
+            echo "Settle Round Simulation Result: " . json_encode($simResult) . "\n";
+
+            // Check for specific errors in simulation
+            if (isset($simResult['value']['err']) && $simResult['value']['err'] !== null) {
+                // Check logs for specific error messages
+                $logs = $simResult['value']['logs'] ?? [];
+                $logsString = implode(' ', $logs);
+
+                // Check for RoundNotReadyForSettle in logs
+                if (strpos($logsString, 'RoundNotReadyForSettle') !== false) {
+                    $currentTime = microtime(true) * 1_000;
+                    if ($currentTime - $startTime > $maxWaitMs) {
+                        throw new Exception('Timed out waiting for round to be ready after ' . ($maxWaitMs / 1_000) . ' seconds');
+                    }
+                    echo "RoundNotReadyForSettle detected in logs, waiting {$pollIntervalMs}ms...\n";
+                    usleep($pollIntervalMs * 1_000);
+                    continue;
+                }
+
+                // If not a retryable error, throw it
+                throw new Exception('Settle Round simulation failed: ' . json_encode($simResult['value']['err']));
+            }
+
+            // If simulation successful, send transaction
+            $sig = $conn->sendTransaction($tx, [$keeper]);
+            echo "Settle Round Transaction: " . $rpcUrl . '?sig=' . $sig . "\n";
+            expect(is_string($sig))->toBeTrue();
+            expect(strlen($sig))->toBeGreaterThan(10);
+
+            // Delay for waiting confirmation
+            echo "Waiting for Settle Round confirmation...\n";
+            sleep(5);
+
+            break;
+        } catch (Exception $e) {
+            echo "Settle Round Error: " . $e->getMessage() . "\n";
+            echo "Error Class: " . get_class($e) . "\n";
+            throw $e;
+        }
+    }
 
 
     /// -- 5. CLAIM BET --
