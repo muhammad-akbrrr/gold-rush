@@ -439,7 +439,6 @@ test('Single Asset Round Tests', function () {
     $conn = new Connection($client);
 
     /// -- 1. CREATE ROUND --
-    // Instruction: createRound
     // Discriminator: [229, 218, 236, 169, 231, 80, 134, 112]
 
     // Derive config PDA
@@ -493,7 +492,6 @@ test('Single Asset Round Tests', function () {
         // Recent blockhash
         $recentBlockhash = $conn->getRecentBlockhash();
         $tx->recentBlockhash = $recentBlockhash['blockhash'];
-        echo "Create Round Recent Blockhash: " . json_encode($recentBlockhash) . "\n";
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$admin]);
@@ -518,8 +516,7 @@ test('Single Asset Round Tests', function () {
         throw $e;
     }
 
-    /// -- 2. START ROUND (loop until can start) --
-    // Instruction: startRound
+    /// -- 2. START ROUND --
     // Discriminator: [144, 144, 43, 7, 193, 42, 217, 215]
 
     // Build data
@@ -551,10 +548,8 @@ test('Single Asset Round Tests', function () {
     // Retry loop for PythError and RoundNotReadyForStart
     while (true) {
         try {
-            // Get fresh recent blockhash for each attempt
+            // Recent blockhash
             $recentBlockhash = $conn->getRecentBlockhash();
-            echo "Start Round Recent Blockhash: " . json_encode($recentBlockhash) . "\n";
-
             $tx->recentBlockhash = $recentBlockhash['blockhash'];
 
             // Simulate transaction first
@@ -640,7 +635,6 @@ test('Single Asset Round Tests', function () {
     }
 
     /// -- 3. PLACE BET --
-    // Instruction: placeBet
     // Discriminator: [222, 62, 67, 220, 63, 166, 126, 33]
 
     // Derive config PDA
@@ -658,7 +652,7 @@ test('Single Asset Round Tests', function () {
     $betPda = $deriveBetPda($programId, $roundPda, $nextBetId);
 
     // Arguments
-    $amount = 10_000_000;
+    $amount = 1_000_000;
     $direction = 0; // up
 
     // Build data
@@ -693,13 +687,12 @@ test('Single Asset Round Tests', function () {
         // Recent blockhash
         $recentBlockhash = $conn->getRecentBlockhash();
         $tx->recentBlockhash = $recentBlockhash['blockhash'];
-        echo "Place Bet Recent Blockhash: " . json_encode($recentBlockhash) . "\n";
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$user]);
         echo "Place Bet Simulation Result: " . json_encode($simResult) . "\n";
 
-        // Only send if simulation is successful
+        // Only send if simulation is successfully
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
             $sig = $conn->sendTransaction($tx, [$user]);
             echo "Place Bet Transaction: " . $rpcUrl . '?sig=' . $sig . "\n";
@@ -719,8 +712,7 @@ test('Single Asset Round Tests', function () {
         throw $e;
     }
 
-    /// -- 4. SETTLE SINGLE ROUND (loop until can settle) --
-    // Instruction: settleSingleRound
+    /// -- 4. SETTLE SINGLE ROUND --
     // Discriminator: [136, 196, 251, 236, 219, 255, 108, 43]
 
     // Build data
@@ -743,13 +735,10 @@ test('Single Asset Round Tests', function () {
     ];
 
     // Remaining accounts
-    $betAccounts = [];
-    $round = $fetchRoundAccount($conn, $roundPda);
-    for ($i = 1; $i <= $round->totalBets; $i++) {
-        $bPda = $deriveBetPda($programId, $roundPda, $i);
-        $betAccounts[] = new AccountMeta($bPda, false, true);
+    $betAccounts = [$betPda];
+    foreach ($betAccounts as $betAccount) {
+        $keys[] = new AccountMeta($betAccount, false, true);
     }
-    $keys = array_merge($keys, $betAccounts);
 
     // Instruction
     $ix = new TransactionInstruction($programId, $keys, $settleRoundData);
@@ -814,8 +803,59 @@ test('Single Asset Round Tests', function () {
         }
     }
 
-
-    /// -- 5. CLAIM BET --
+    /// -- 5. CLAIM REWARD --
     // Instruction: claimReward
     // Discriminator: [149, 95, 181, 242, 94, 90, 158, 162]
+
+    // Build data
+    $claimRewardDiscriminator = chr(149) . chr(95) . chr(181) . chr(242) . chr(94) . chr(90) . chr(158) . chr(162);
+    $claimRewardData = $claimRewardDiscriminator;
+
+    // print round
+    $roundd = $fetchRoundAccount($conn, $roundPda);
+    echo "Round: " . json_encode($round->status) . "\n";
+
+    // Context accounts
+    $keys = [
+        new AccountMeta($user->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, false),
+        new AccountMeta($roundPda, false, false),
+        new AccountMeta($vaultPda, false, true),
+        new AccountMeta($betPda, false, true),
+        new AccountMeta($userTokenAccount, false, true),
+        new AccountMeta($mint, false, false),
+        new AccountMeta($tokenProgramId, false, false),
+        new AccountMeta($systemProgramId, false, false),
+    ];
+
+    // Instruction
+    $ix = new TransactionInstruction($programId, $keys, $claimRewardData);
+    $tx = new Transaction();
+    $tx->feePayer = $user->getPublicKey();
+    $tx->add($ix);
+
+    try {
+        // Recent blockhash
+        $recentBlockhash = $conn->getRecentBlockhash();
+        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+
+        // Simulate transaction
+        $simResult = $conn->simulateTransaction($tx, [$user]);
+        echo "Claim Reward Simulation Result: " . json_encode($simResult) . "\n";
+
+        // Only send if simulation is successfully
+        if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+            $sig = $conn->sendTransaction($tx, [$user]);
+            echo "Claim Reward Transaction: " . $rpcUrl . '?sig=' . $sig . "\n";
+        } else {
+            throw new Exception('Claim Reward Simulation failed: ' . json_encode($simResult['value']['err']));
+        }
+
+        expect(is_string($sig))->toBeTrue();
+        expect(strlen($sig))->toBeGreaterThan(10);
+    } catch (Exception $e) {
+        echo "Claim Reward Error: " . $e->getMessage() . "\n";
+        echo "Error Class: " . get_class($e) . "\n";
+        throw $e;
+    }
 })->group('solana');
