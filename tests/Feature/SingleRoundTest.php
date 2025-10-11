@@ -382,7 +382,7 @@ test('Single Asset Round Tests', function () {
     $getPriceFeedAccountAddress = function (string $feedId, string $shardId = '0') use ($toPublicKey): PublicKey {
         $programIdEnv = getenv('DEFAULT_PUSH_ORACLE_PROGRAM_ID') ?: '';
         if ($programIdEnv === '') {
-            $this->markTestSkipped('PUSH_ORACLE_PROGRAM_ID not set.');
+            $this->markTestSkipped('DEFAULT_PUSH_ORACLE_PROGRAM_ID not set.');
         }
         $pushOracleProgramId = $toPublicKey($programIdEnv);
 
