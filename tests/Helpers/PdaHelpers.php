@@ -53,6 +53,18 @@ class PdaHelpers
     }
 
     /**
+     * Derive asset pda
+     */
+    public static function deriveAssetPda(PublicKey $programId, PublicKey $groupAssetPda, int $assetId): PublicKey
+    {
+        $low32 = $assetId & 0xFFFFFFFF;
+        $high32 = ($assetId >> 32) & 0xFFFFFFFF;
+        $assetIdSeed = pack('V2', $low32, $high32);
+
+        return PublicKey::findProgramAddressSync(['asset', $groupAssetPda->toBinaryString(), $assetIdSeed], $programId)[0];
+    }
+
+    /**
      * Derive bet PDA
      */
     public static function deriveBetPda(PublicKey $programId, PublicKey $roundPda, int $betId): PublicKey

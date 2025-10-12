@@ -165,6 +165,9 @@ test('Group Round Tests', function () {
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
             $sig = $conn->sendTransaction($tx, [$env->admin]);
             echo "Insert Group Asset Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+
+            // wait for transaction confirmation
+            sleep(10);
         } else {
             throw new Exception('Insert Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
         }
@@ -177,9 +180,63 @@ test('Group Round Tests', function () {
         throw $e;
     }
 
-
     /// -- 3. INSERT ASSET --
     // Discriminator: [190, 133, 160, 163, 45, 85, 168, 161]
+
+    $assetId = 1;
+
+    // Derive asset PDA
+    $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
+
+    // Arguments
+    $symbol = BytesHelpers::stringToBytes("ASSET " . $assetId);
+
+    // Build data
+    $symbolBuf = BytesHelpers::arrayToString($symbol);
+    $insertAssetDiscrimator = chr(190) . chr(133) . chr(160) . chr(163) . chr(45) . chr(85) . chr(168) . chr(161);
+    $insertAssetData = $insertAssetDiscrimator . $symbolBuf;
+
+    // Context accounts
+    $keys = [
+        new AccountMeta($env->admin->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, false),
+        new AccountMeta($roundPda, false, false),
+        new AccountMeta($groupAssetPda, false, true),
+        new AccountMeta($assetPda, false, true),
+        new AccountMeta($goldPriceFeedAccount, false, false),
+        new AccountMeta($env->systemProgramId, false, false),
+    ];
+
+    // Instruction
+    $ix = new TransactionInstruction($env->programId, $keys, $insertAssetData);
+    $tx = new Transaction();
+    $tx->feePayer = $env->admin->getPublicKey();
+    $tx->add($ix);
+
+    try {
+        // Recent blockhash
+        $recentBlockhash = $conn->getRecentBlockhash();
+        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+
+        // Simulate transaction
+        $simResult = $conn->simulateTransaction($tx, [$env->admin]);
+        echo "Insert Asset Simulation Result: " . json_encode($simResult) . "\n";
+
+        // Only send if simulation is successfully
+        if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+            $sig = $conn->sendTransaction($tx, [$env->admin]);
+            echo "Insert Asset Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+        } else {
+            throw new Exception('Insert Asset simulation failed: ' . json_encode($simResult['value']['err']));
+        }
+
+        expect(is_string($sig))->toBeTrue();
+        expect(strlen($sig))->toBeGreaterThan(10);
+    } catch (Exception $e) {
+        echo "Insert Asset Error: " . $e->getMessage() . "\n";
+        echo "Error Class: " . get_class($e) . "\n";
+        throw $e;
+    }
 
     /// -- 4. CAPTURE START PRICE --
     // Discriminator: [51, 86, 229, 68, 153, 204, 34, 199]
