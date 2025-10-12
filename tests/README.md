@@ -97,7 +97,7 @@ USER_KEYPAIR_PATH=/Users/hutomo/.config/solana/localnet/4.json
 # Gold price feed ID (32-byte hex string)
 GOLD_PRICE_FEED_ID=0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2
 # Push Oracle Program ID (cloned from mainnet)
-DEFAULT_PUSH_ORACLE_PROGRAM_ID=2uPQGpm8X4ZkxMHxrAW1QuhXcse1AHEgPih6Xp9NuEWW
+PUSH_ORACLE_PROGRAM_ID=2uPQGpm8X4ZkxMHxrAW1QuhXcse1AHEgPih6Xp9NuEWW
 
 # Laravel Test Configuration
 APP_ENV=testing
@@ -142,4 +142,4 @@ The following environment variables must be set in your `.env.testing` file:
 | `TREASURY_KEYPAIR_PATH` | Treasury keypair file path | `/Users/hutomo/.config/solana/localnet/3.json` |
 | `USER_KEYPAIR_PATH` | User keypair file path | `/Users/hutomo/.config/solana/localnet/4.json` |
 | `GOLD_PRICE_FEED_ID` | Gold price feed ID (hex) | `0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2` |
-| `DEFAULT_PUSH_ORACLE_PROGRAM_ID` | Push Oracle Program ID | `2uPQGpm8X4ZkxMHxrAW1QuhXcse1AHEgPih6Xp9NuEWW` |
+| `PUSH_ORACLE_PROGRAM_ID` | Push Oracle Program ID | `2uPQGpm8X4ZkxMHxrAW1QuhXcse1AHEgPih6Xp9NuEWW` |
