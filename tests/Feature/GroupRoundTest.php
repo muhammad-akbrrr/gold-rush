@@ -328,6 +328,55 @@ test('Group Round Tests', function () {
     /// -- 5. FINALIZE START GROUP ASSETS --
     // Discriminator: [122, 206, 104, 17, 125, 66, 221, 196]
 
+    // Build data
+    $finalizeStartGroupAssetDiscriminator = chr(122) . chr(206) . chr(104) . chr(17) . chr(125) . chr(66) . chr(221) . chr(196);
+    $finalizeStartGroupAssetData = $finalizeStartGroupAssetDiscriminator;
+
+    // Context accounts
+    $keys = [
+        new AccountMeta($env->keeper->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, false),
+        new AccountMeta($roundPda, false, true),
+        new AccountMeta($env->systemProgramId, false, false),
+    ];
+
+    // Remaining accounts
+    $keys[] = new AccountMeta($assetPda, false, true);
+
+    // Instruction
+    $ix = new TransactionInstruction($env->programId, $keys, $finalizeStartGroupAssetData);
+    $tx = new Transaction();
+    $tx->feePayer = $env->keeper->getPublicKey();
+    $tx->add($ix);
+
+    try {
+        // Recent blockhash
+        $recentBlockhash = $conn->getRecentBlockhash();
+        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+
+        // Simulate transaction
+        $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
+        echo "Finalize Start Group Asset Simulation Result: " . json_encode($simResult) . "\n";
+
+        // Only send if simulation is successfully
+        if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+            $sig = $conn->sendTransaction($tx, [$env->admin]);
+            echo "Finalize Start Group Asset Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+
+            // wait for transaction confirmation
+            sleep(10);
+        } else {
+            throw new Exception('Finalize Start Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
+        }
+
+        expect(is_string($sig))->toBeTrue();
+        expect(strlen($sig))->toBeGreaterThan(10);
+    } catch (Exception $e) {
+        echo "Finalize Start Group Asset Error: " . $e->getMessage() . "\n";
+        echo "Error Class: " . get_class($e) . "\n";
+        throw $e;
+    }
+
     /// -- 6. FINALIZE START GROUPS --
     // Discriminator: [56, 19, 3, 166, 223, 164, 105, 30]
 
