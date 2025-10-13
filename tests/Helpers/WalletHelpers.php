@@ -21,6 +21,11 @@ class WalletHelpers
      */
     public static function loadKeypairFromJsonFile(string $path): Keypair
     {
+        if (!str_starts_with($path, '/')) {
+            $projectRoot = dirname(__DIR__, 2);
+            $path = $projectRoot . '/' . $path;
+        }
+
         if (!is_file($path)) {
             throw new Exception("Keypair file not found: {$path}");
         }

@@ -10,6 +10,7 @@ require_once __DIR__ . '/../Helpers/AccountHelpers.php';
 require_once __DIR__ . '/../Helpers/Env.php';
 require_once __DIR__ . '/../Helpers/PdaHelpers.php';
 require_once __DIR__ . '/../Helpers/PythHelpers.php';
+require_once __DIR__ . '/../Helpers/UrlHelpers.php';
 require_once __DIR__ . '/../Helpers/WalletHelpers.php';
 
 test('Single Asset Round Tests', function () {
@@ -104,7 +105,7 @@ test('Single Asset Round Tests', function () {
         // Only send if simulation is successfully
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
             $sig = $conn->sendTransaction($tx, [$env->admin]);
-            echo "Create Round Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            echo "Create Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
             // Wait for transaction confirmation (simplified approach)
             sleep(5);
@@ -193,7 +194,7 @@ test('Single Asset Round Tests', function () {
 
             // If simulation successful, send transaction
             $sig = $conn->sendTransaction($tx, [$env->keeper]);
-            echo "Start Round Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            echo "Start Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
             expect(is_string($sig))->toBeTrue();
             expect(strlen($sig))->toBeGreaterThan(10);
 
@@ -298,7 +299,7 @@ test('Single Asset Round Tests', function () {
         // Only send if simulation is successfully
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
             $sig = $conn->sendTransaction($tx, [$env->user]);
-            echo "Place Bet Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            echo "Place Bet Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
             // Wait for transaction confirmation (simplified approach)
             echo "Waiting for Place Bet confirmation...\n";
@@ -390,7 +391,7 @@ test('Single Asset Round Tests', function () {
 
             // If simulation successful, send transaction
             $sig = $conn->sendTransaction($tx, [$env->keeper]);
-            echo "Settle Round Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            echo "Settle Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
             expect(is_string($sig))->toBeTrue();
             expect(strlen($sig))->toBeGreaterThan(10);
 
@@ -445,7 +446,7 @@ test('Single Asset Round Tests', function () {
         // Only send if simulation is successfully
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
             $sig = $conn->sendTransaction($tx, [$env->user]);
-            echo "Claim Reward Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            echo "Claim Reward Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
         } else {
             throw new Exception('Claim Reward Simulation failed: ' . json_encode($simResult['value']['err']));
         }

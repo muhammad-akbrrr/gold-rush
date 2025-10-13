@@ -7,7 +7,19 @@ This directory contains helper functions extracted from Solana tests to make tes
 
 ### Quick Start Guide
 
-For a quick setup, follow these steps:
+Choose one of the following options based on your preference:
+
+#### Option 1: Running on Devnet (Recommended for Quick Testing)
+
+```bash
+# 1. Copy the example environment file
+cp .env.testing.example .env.testing
+
+# 2. Run the test
+php artisan test --filter=SingleRoundTest
+```
+
+#### Option 2: Running on Local Network
 
 ```bash
 # 1. Start local Solana validator
@@ -21,7 +33,53 @@ anchor deploy && anchor run deploy_testing
 php artisan test --filter=SingleRoundTest
 ```
 
-### Prerequisites
+## Setup Instructions
+
+### Option 1: Devnet Setup (Recommended)
+
+Running tests on Solana devnet is the easiest way to get started as it uses pre-deployed programs and doesn't require local validator setup.
+
+#### Prerequisites for Devnet
+- Program already deployed on devnet
+- Token mint already created on devnet
+
+#### Steps for Devnet Setup
+
+1. **Copy the example environment file**
+```bash
+cp .env.testing.example .env.testing
+```
+
+2. **Configure environment variables for devnet**
+Update the following values in `.env.testing`:
+```env
+# Devnet Configuration
+SOLANA_RPC_URL=https://api.devnet.solana.com
+PROGRAM_ID=YOUR_DEPLOYED_PROGRAM_ID_ON_DEVNET
+TOKEN_MINT=YOUR_TOKEN_MINT_ON_DEVNET
+
+# Wallet paths (already configured for project wallets)
+ADMIN_KEYPAIR_PATH=tests/Wallets/1.json
+KEEPER_KEYPAIR_PATH=tests/Wallets/1.json
+TREASURY_KEYPAIR_PATH=tests/Wallets/1.json
+USER_KEYPAIR_PATH=tests/Wallets/2.json
+
+# Other required configurations
+SYSTEM_PROGRAM_ID=11111111111111111111111111111112
+TOKEN_PROGRAM_ID=TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+ASSOCIATED_TOKEN_PROGAM_ID=ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL
+GOLD_PRICE_FEED_ID=0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2
+PUSH_ORACLE_PROGRAM_ID=2uPQGpm8X4ZkxMHxrAW1QuhXcse1AHEgPih6Xp9NuEWW
+```
+
+3. **Run the tests**
+```bash
+php artisan test --filter=SingleRoundTest
+```
+
+**Note**: The `.env.testing.example` file is already configured with devnet settings. You only need to update the `PROGRAM_ID` and `TOKEN_MINT` values with your deployed program details.
+
+### Option 2: Local Network Setup
 
 Before running the SingleRoundTest on local network, you need to prepare the following:
 
@@ -85,13 +143,13 @@ ASSOCIATED_TOKEN_PROGAM_ID=ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL
 # Update TOKEN_MINT with the mint address from your anchor run deploy_testing output
 TOKEN_MINT=3LpgtrCHmecZD76odqhUjkdZ1zbDMEPKJAyVgcRZUP2V
 
-# Keypair Paths (Default Solana CLI localnet keypairs)
-# Update these paths according to your system's Solana CLI configuration
-# These are the default paths when using solana-test-validator
-ADMIN_KEYPAIR_PATH=/Users/hutomo/.config/solana/localnet/1.json
-KEEPER_KEYPAIR_PATH=/Users/hutomo/.config/solana/localnet/2.json
-TREASURY_KEYPAIR_PATH=/Users/hutomo/.config/solana/localnet/3.json
-USER_KEYPAIR_PATH=/Users/hutomo/.config/solana/localnet/4.json
+# Keypair Paths (Project test wallets)
+# Using wallet files from the project's tests/Wallets directory
+# These are test keypairs included in the project for testing purposes
+ADMIN_KEYPAIR_PATH=tests/Wallets/1.json
+KEEPER_KEYPAIR_PATH=tests/Wallets/2.json
+TREASURY_KEYPAIR_PATH=tests/Wallets/3.json
+USER_KEYPAIR_PATH=tests/Wallets/4.json
 
 # Price Feed Configuration
 # Gold price feed ID (32-byte hex string)
@@ -129,17 +187,32 @@ php artisan test --filter=SingleRoundTest
 
 The following environment variables must be set in your `.env.testing` file:
 
+### For Devnet Configuration
+
+| Variable | Description | Devnet Example |
+|----------|-------------|----------------|
+| `SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.devnet.solana.com` |
+| `PROGRAM_ID` | Your deployed program ID on devnet | `3Ut8a8pvtNBEXY3ukuQzXgHpADByembaMqeCrBiyiKXv` |
+| `TOKEN_MINT` | Your token mint address on devnet | `9mT7bBE2PEBF9Zxa7gdKEjZNwBSKSUp99paR9qqT69Ad` |
+
+### For Local Network Configuration
+
+| Variable | Description | Local Example |
+|----------|-------------|---------------|
+| `SOLANA_RPC_URL` | Solana RPC endpoint | `http://127.0.0.1:8899` |
+| `PROGRAM_ID` | Your deployed program ID | `3Ut8a8pvtNBEXY3ukuQzXgHpADByembaMqeCrBiyiKXv` |
+| `TOKEN_MINT` | Your token mint address | `YOUR_TOKEN_MINT_ON_LOCALNET` |
+
+### Common Configuration (Same for Both Networks)
+
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `SOLANA_RPC_URL` | Solana RPC endpoint | `http://127.0.0.1:8899` |
-| `PROGRAM_ID` | Your deployed program ID | `FM7SQyRJExhzjFYvZ6XZTLkSSjNcMdDkCq89PWF9FtMB` |
 | `SYSTEM_PROGRAM_ID` | Solana System Program ID | `11111111111111111111111111111112` |
 | `TOKEN_PROGRAM_ID` | SPL Token Program ID | `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA` |
 | `ASSOCIATED_TOKEN_PROGAM_ID` | Associated Token Program ID | `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL` |
-| `TOKEN_MINT` | Your token mint address | `3LpgtrCHmecZD76odqhUjkdZ1zbDMEPKJAyVgcRZUP2V` |
-| `ADMIN_KEYPAIR_PATH` | Admin keypair file path | `/Users/hutomo/.config/solana/localnet/1.json` |
-| `KEEPER_KEYPAIR_PATH` | Keeper keypair file path | `/Users/hutomo/.config/solana/localnet/2.json` |
-| `TREASURY_KEYPAIR_PATH` | Treasury keypair file path | `/Users/hutomo/.config/solana/localnet/3.json` |
-| `USER_KEYPAIR_PATH` | User keypair file path | `/Users/hutomo/.config/solana/localnet/4.json` |
+| `ADMIN_KEYPAIR_PATH` | Admin keypair file path | `tests/Wallets/1.json` |
+| `KEEPER_KEYPAIR_PATH` | Keeper keypair file path | `tests/Wallets/1.json` |
+| `TREASURY_KEYPAIR_PATH` | Treasury keypair file path | `tests/Wallets/1.json` |
+| `USER_KEYPAIR_PATH` | User keypair file path | `tests/Wallets/2.json` |
 | `GOLD_PRICE_FEED_ID` | Gold price feed ID (hex) | `0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2` |
 | `PUSH_ORACLE_PROGRAM_ID` | Push Oracle Program ID | `2uPQGpm8X4ZkxMHxrAW1QuhXcse1AHEgPih6Xp9NuEWW` |
