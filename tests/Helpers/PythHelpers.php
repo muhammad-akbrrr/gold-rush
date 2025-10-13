@@ -12,7 +12,7 @@ class PythHelpers
     /**
      * Get price feed account address
      */
-    public static function getPriceFeedAccount(string $feedId, string $shardId = '0', PublicKey $pushOracleProgramId): PublicKey
+    public static function getPriceFeedAccount(string $feedId, PublicKey $pushOracleProgramId, string $shardId = '0'): PublicKey
     {
         $hex = strtolower(trim($feedId));
         if (str_starts_with($hex, '0x')) {

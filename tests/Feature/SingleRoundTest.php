@@ -35,7 +35,6 @@ test('Single Asset Round Tests', function () {
     // Price feed account
     $goldPriceFeedAccount = PythHelpers::getPriceFeedAccount(
         $env->goldPriceFeedId,
-        '0',
         $env->pushOracleProgramId
     );
 

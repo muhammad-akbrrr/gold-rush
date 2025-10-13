@@ -35,7 +35,6 @@ test('Group Round Tests', function () {
     // Price feed account
     $goldPriceFeedAccount = PythHelpers::getPriceFeedAccount(
         $env->goldPriceFeedId,
-        '0',
         $env->pushOracleProgramId,
     );
 
@@ -53,10 +52,7 @@ test('Group Round Tests', function () {
     $config = AccountHelpers::fetchConfigAccount($conn, $configPda);
     $currentRoundId = $config->currentRoundCounter;
     $nextRoundId = $currentRoundId + 1;
-
-    // Debug current round info
-    echo "Current Round ID: " . $currentRoundId . "\n";
-    echo "Next Round ID: " . $nextRoundId . "\n";
+    echo "Round ID: " . $nextRoundId . "\n";
 
     // Derive round PDA
     $roundPda = PdaHelpers::deriveRoundPda($env->programId, $nextRoundId);
@@ -105,10 +101,10 @@ test('Group Round Tests', function () {
         // Only send if simulation is successfully
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
             $sig = $conn->sendTransaction($tx, [$env->admin]);
-            echo "Create Round Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            echo "Create Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
             // Wait for transaction confirmation
-            sleep(10);
+            sleep(15);
         } else {
             throw new Exception('Create Round simulation failed: ' . json_encode($simResult['value']['err']));
         }
@@ -124,158 +120,175 @@ test('Group Round Tests', function () {
     /// -- 2. INSERT GROUP ASSET --
     // Discriminator: [216, 166, 209, 92, 245, 228, 53, 67]
 
-    $groupId = 1;
+    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
 
-    // Derive group asset PDA
-    $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
+    for ($groupId = 1; $groupId <= 2; $groupId++) {
+        // Derive group asset PDA
+        $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
 
-    // Arguments
-    $symbol = BytesHelpers::stringToBytes("ASA " . $groupId);
+        // Arguments
+        $symbol = BytesHelpers::stringToBytes("GROUP " . $groupId);
 
-    // Build data
-    $symbolBuf = BytesHelpers::arrayToString($symbol);
-    $insertGroupAssetDiscrimator = chr(216) . chr(166) . chr(209) . chr(92) . chr(245) . chr(228) . chr(53) . chr(67);
-    $insertGroupAssetData = $insertGroupAssetDiscrimator . $symbolBuf;
+        // Build data
+        $symbolBuf = BytesHelpers::arrayToString($symbol);
+        $insertGroupAssetDiscrimator = chr(216) . chr(166) . chr(209) . chr(92) . chr(245) . chr(228) . chr(53) . chr(67);
+        $insertGroupAssetData = $insertGroupAssetDiscrimator . $symbolBuf;
 
-    // Context accounts
-    $keys = [
-        new AccountMeta($env->admin->getPublicKey(), true, true),
-        new AccountMeta($configPda, false, false),
-        new AccountMeta($roundPda, false, true),
-        new AccountMeta($groupAssetPda, false, true),
-        new AccountMeta($env->systemProgramId, false, false),
-    ];
+        // Context accounts
+        $keys = [
+            new AccountMeta($env->admin->getPublicKey(), true, true),
+            new AccountMeta($configPda, false, false),
+            new AccountMeta($roundPda, false, true),
+            new AccountMeta($groupAssetPda, false, true),
+            new AccountMeta($env->systemProgramId, false, false),
+        ];
 
-    // Instruction
-    $ix = new TransactionInstruction($env->programId, $keys, $insertGroupAssetData);
-    $tx = new Transaction();
-    $tx->feePayer = $env->admin->getPublicKey();
-    $tx->add($ix);
+        // Instruction
+        $ix = new TransactionInstruction($env->programId, $keys, $insertGroupAssetData);
+        $tx = new Transaction();
+        $tx->feePayer = $env->admin->getPublicKey();
+        $tx->add($ix);
 
-    try {
-        // Recent blockhash
-        $recentBlockhash = $conn->getRecentBlockhash();
-        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+        try {
+            // Recent blockhash
+            $recentBlockhash = $conn->getRecentBlockhash();
+            $tx->recentBlockhash = $recentBlockhash['blockhash'];
 
-        // Simulate transaction
-        $simResult = $conn->simulateTransaction($tx, [$env->admin]);
-        echo "Insert Group Asset Simulation Result: " . json_encode($simResult) . "\n";
+            // Simulate transaction
+            $simResult = $conn->simulateTransaction($tx, [$env->admin]);
+            echo "Insert Group Asset Simulation Result: " . json_encode($simResult) . "\n";
 
-        // Only send if simulation is successfully
-        if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
-            $sig = $conn->sendTransaction($tx, [$env->admin]);
-            echo "Insert Group Asset Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            // Only send if simulation is successfully
+            if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+                $sig = $conn->sendTransaction($tx, [$env->admin]);
+                echo "Insert Group Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-            // wait for transaction confirmation
-            sleep(10);
-        } else {
-            throw new Exception('Insert Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
+                // wait for transaction confirmation
+                sleep(15);
+            } else {
+                throw new Exception('Insert Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
+            }
+
+            expect(is_string($sig))->toBeTrue();
+            expect(strlen($sig))->toBeGreaterThan(10);
+        } catch (Exception $e) {
+            echo "Insert Group Asset Error: " . $e->getMessage() . "\n";
+            echo "Error Class: " . get_class($e) . "\n";
+            throw $e;
         }
-
-        expect(is_string($sig))->toBeTrue();
-        expect(strlen($sig))->toBeGreaterThan(10);
-    } catch (Exception $e) {
-        echo "Insert Group Asset Error: " . $e->getMessage() . "\n";
-        echo "Error Class: " . get_class($e) . "\n";
-        throw $e;
     }
 
     /// -- 3. INSERT ASSET --
     // Discriminator: [190, 133, 160, 163, 45, 85, 168, 161]
 
-    $assetId = 1;
+    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
 
-    // Derive asset PDA
-    $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
+    for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
+        $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
 
-    // Arguments
-    $symbol = BytesHelpers::stringToBytes("ASSET " . $assetId);
+        $groupAsset = AccountHelpers::fetchGroupAssetAccount($conn, $groupAssetPda);
+        for ($assetId = 1; $assetId <= 2; $assetId++) {
+            // Derive asset PDA
+            $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
 
-    // Build data
-    $symbolBuf = BytesHelpers::arrayToString($symbol);
-    $insertAssetDiscrimator = chr(190) . chr(133) . chr(160) . chr(163) . chr(45) . chr(85) . chr(168) . chr(161);
-    $insertAssetData = $insertAssetDiscrimator . $symbolBuf;
+            // Arguments
+            $symbol = BytesHelpers::stringToBytes("ASSET " . $assetId);
 
-    // Context accounts
-    $keys = [
-        new AccountMeta($env->admin->getPublicKey(), true, true),
-        new AccountMeta($configPda, false, false),
-        new AccountMeta($roundPda, false, false),
-        new AccountMeta($groupAssetPda, false, true),
-        new AccountMeta($assetPda, false, true),
-        new AccountMeta($goldPriceFeedAccount, false, false),
-        new AccountMeta($env->systemProgramId, false, false),
-    ];
+            // Build data
+            $symbolBuf = BytesHelpers::arrayToString($symbol);
+            $insertAssetDiscrimator = chr(190) . chr(133) . chr(160) . chr(163) . chr(45) . chr(85) . chr(168) . chr(161);
+            $insertAssetData = $insertAssetDiscrimator . $symbolBuf;
 
-    // Instruction
-    $ix = new TransactionInstruction($env->programId, $keys, $insertAssetData);
-    $tx = new Transaction();
-    $tx->feePayer = $env->admin->getPublicKey();
-    $tx->add($ix);
+            // Context accounts
+            $keys = [
+                new AccountMeta($env->admin->getPublicKey(), true, true),
+                new AccountMeta($configPda, false, false),
+                new AccountMeta($roundPda, false, false),
+                new AccountMeta($groupAssetPda, false, true),
+                new AccountMeta($assetPda, false, true),
+                new AccountMeta($goldPriceFeedAccount, false, false),
+                new AccountMeta($env->systemProgramId, false, false),
+            ];
 
-    try {
-        // Recent blockhash
-        $recentBlockhash = $conn->getRecentBlockhash();
-        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+            // Instruction
+            $ix = new TransactionInstruction($env->programId, $keys, $insertAssetData);
+            $tx = new Transaction();
+            $tx->feePayer = $env->admin->getPublicKey();
+            $tx->add($ix);
 
-        // Simulate transaction
-        $simResult = $conn->simulateTransaction($tx, [$env->admin]);
-        echo "Insert Asset Simulation Result: " . json_encode($simResult) . "\n";
+            try {
+                // Recent blockhash
+                $recentBlockhash = $conn->getRecentBlockhash();
+                $tx->recentBlockhash = $recentBlockhash['blockhash'];
 
-        // Only send if simulation is successfully
-        if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
-            $sig = $conn->sendTransaction($tx, [$env->admin]);
-            echo "Insert Asset Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+                // Simulate transaction
+                $simResult = $conn->simulateTransaction($tx, [$env->admin]);
+                echo "Insert Asset Simulation Result: " . json_encode($simResult) . "\n";
 
-            // wait for transaction confirmation
-            sleep(10);
-        } else {
-            throw new Exception('Insert Asset simulation failed: ' . json_encode($simResult['value']['err']));
+                // Only send if simulation is successfully
+                if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+                    $sig = $conn->sendTransaction($tx, [$env->admin]);
+                    echo "Insert Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+                    // wait for transaction confirmation
+                    sleep(15);
+                } else {
+                    throw new Exception('Insert Asset simulation failed: ' . json_encode($simResult['value']['err']));
+                }
+
+                expect(is_string($sig))->toBeTrue();
+                expect(strlen($sig))->toBeGreaterThan(10);
+            } catch (Exception $e) {
+                echo "Insert Asset Error: " . $e->getMessage() . "\n";
+                echo "Error Class: " . get_class($e) . "\n";
+                throw $e;
+            }
         }
-
-        expect(is_string($sig))->toBeTrue();
-        expect(strlen($sig))->toBeGreaterThan(10);
-    } catch (Exception $e) {
-        echo "Insert Asset Error: " . $e->getMessage() . "\n";
-        echo "Error Class: " . get_class($e) . "\n";
-        throw $e;
     }
 
     /// -- 4. CAPTURE START PRICE --
     // Discriminator: [51, 86, 229, 68, 153, 204, 34, 199]
 
-    // Build data
-    $captureStartPriceDiscriminator = chr(51) . chr(86) . chr(229) . chr(68) . chr(153) . chr(204) . chr(34) . chr(199);
-    $captureStartPriceData = $captureStartPriceDiscriminator;
+    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
 
-    // Context accounts
-    $keys = [
-        new AccountMeta($env->keeper->getPublicKey(), true, true),
-        new AccountMeta($configPda, false, false),
-        new AccountMeta($roundPda, false, true),
-        new AccountMeta($groupAssetPda, false, true),
-        new AccountMeta($env->systemProgramId, false, false),
-    ];
+    for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
+        $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
 
-    // Remaining accounts
-    $keys[] = new AccountMeta($assetPda, false, true);
-    $keys[] = new AccountMeta($goldPriceFeedAccount, false, false);
+        // Build data
+        $captureStartPriceDiscriminator = chr(51) . chr(86) . chr(229) . chr(68) . chr(153) . chr(204) . chr(34) . chr(199);
+        $captureStartPriceData = $captureStartPriceDiscriminator;
 
-    // Instruction
-    $ix = new TransactionInstruction($env->programId, $keys, $captureStartPriceData);
-    $tx = new Transaction();
-    $tx->feePayer = $env->keeper->getPublicKey();
-    $tx->add($ix);
+        // Context accounts
+        $keys = [
+            new AccountMeta($env->keeper->getPublicKey(), true, true),
+            new AccountMeta($configPda, false, false),
+            new AccountMeta($roundPda, false, true),
+            new AccountMeta($groupAssetPda, false, true),
+            new AccountMeta($env->systemProgramId, false, false),
+        ];
 
-    // Retry configuration
-    $maxWaitMs = 20_000; // 20 seconds
-    $pollIntervalMs = 1_000; // 1 second
-    $maxRetries = 20;
-    $retryCount = 0;
-    $startTime = microtime(true) * 1_000;
+        // Remaining accounts
+        $remainingAccounts = [];
+        $groupAsset = AccountHelpers::fetchGroupAssetAccount($conn, $groupAssetPda);
+        echo "Captured Start Price Assets: " . $groupAsset->capturedStartPriceAssets . "\n";
+        echo "Total Assets: " . $groupAsset->totalAssets . "\n";
+        for ($assetId = 1; $assetId <= $groupAsset->totalAssets; $assetId++) {
+            $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
 
-    // Retry loop for PythError
-    while (true) {
+            // asset pda
+            $remainingAccounts[] = new AccountMeta($assetPda, false, true);
+
+            // price feed account
+            $remainingAccounts[] = new AccountMeta($goldPriceFeedAccount, false, false);
+        }
+        $keys = array_merge($keys, $remainingAccounts);
+
+        // Instruction
+        $ix = new TransactionInstruction($env->programId, $keys, $captureStartPriceData);
+        $tx = new Transaction();
+        $tx->feePayer = $env->keeper->getPublicKey();
+        $tx->add($ix);
+
         try {
             // Recent blockhash
             $recentBlockhash = $conn->getRecentBlockhash();
@@ -285,38 +298,19 @@ test('Group Round Tests', function () {
             $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
             echo "Capture Start Price Simulation Result: " . json_encode($simResult) . "\n";
 
-            // Check for specific errors in simulation
-            if (isset($simResult['value']['err']) && $simResult['value']['err'] !== null) {
-                // Check logs for specific error messages
-                $logs = $simResult['value']['logs'] ?? [];
-                $logsString = implode(' ', $logs);
+            // Only send if simulation is successfully
+            if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+                $sig = $conn->sendTransaction($tx, [$env->keeper]);
+                echo "Capture Start Price Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-                // Check for PythError in logs
-                if (strpos($logsString, 'PythError') !== false) {
-                    $retryCount++;
-                    if ($retryCount >= $maxRetries) {
-                        throw new Exception('Timed out waiting for pyth error to resolve after ' . $maxRetries . ' attempts');
-                    }
-                    echo "PythError detected in logs (attempt {$retryCount}/{$maxRetries}), waiting {$pollIntervalMs}ms...\n";
-                    usleep($pollIntervalMs * 1_000);
-                    continue;
-                }
-
-                // If not a retryable error, throw it
+                // wait for transaction confirmation
+                sleep(15);
+            } else {
                 throw new Exception('Capture Start Price simulation failed: ' . json_encode($simResult['value']['err']));
             }
 
-            // If simulation successful, send transaction
-            $sig = $conn->sendTransaction($tx, [$env->keeper]);
-            echo "Capture Start Price Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
-
-            // wait for transaction confirmation
-            sleep(10);
-
             expect(is_string($sig))->toBeTrue();
             expect(strlen($sig))->toBeGreaterThan(10);
-
-            break;
         } catch (Exception $e) {
             echo "Capture Start Price Error: " . $e->getMessage() . "\n";
             echo "Error Class: " . get_class($e) . "\n";
@@ -328,9 +322,73 @@ test('Group Round Tests', function () {
     /// -- 5. FINALIZE START GROUP ASSETS --
     // Discriminator: [122, 206, 104, 17, 125, 66, 221, 196]
 
+    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
+        $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
+
+        // Build data
+        $finalizeStartGroupAssetDiscriminator = chr(122) . chr(206) . chr(104) . chr(17) . chr(125) . chr(66) . chr(221) . chr(196);
+        $finalizeStartGroupAssetData = $finalizeStartGroupAssetDiscriminator;
+
+        // Context accounts
+        $keys = [
+            new AccountMeta($env->keeper->getPublicKey(), true, true),
+            new AccountMeta($configPda, false, false),
+            new AccountMeta($roundPda, false, false),
+            new AccountMeta($groupAssetPda, false, true),
+            new AccountMeta($env->systemProgramId, false, false),
+        ];
+
+        // Remaining accounts
+        $remainingAccounts = [];
+        $groupAsset = AccountHelpers::fetchGroupAssetAccount($conn, $groupAssetPda);
+        for ($assetId = 1; $assetId <= $groupAsset->totalAssets; $assetId++) {
+            $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
+            $remainingAccounts[] = new AccountMeta($assetPda, false, true);
+        }
+        $keys = array_merge($keys, $remainingAccounts);
+
+        // Instruction
+        $ix = new TransactionInstruction($env->programId, $keys, $finalizeStartGroupAssetData);
+        $tx = new Transaction();
+        $tx->feePayer = $env->keeper->getPublicKey();
+        $tx->add($ix);
+
+        try {
+            // Recent blockhash
+            $recentBlockhash = $conn->getRecentBlockhash();
+            $tx->recentBlockhash = $recentBlockhash['blockhash'];
+
+            // Simulate transaction
+            $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
+            echo "Finalize Start Group Asset Simulation Result: " . json_encode($simResult) . "\n";
+
+            // Only send if simulation is successfully
+            if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+                $sig = $conn->sendTransaction($tx, [$env->admin]);
+                echo "Finalize Start Group Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+                // wait for transaction confirmation
+                sleep(15);
+            } else {
+                throw new Exception('Finalize Start Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
+            }
+
+            expect(is_string($sig))->toBeTrue();
+            expect(strlen($sig))->toBeGreaterThan(10);
+        } catch (Exception $e) {
+            echo "Finalize Start Group Asset Error: " . $e->getMessage() . "\n";
+            echo "Error Class: " . get_class($e) . "\n";
+            throw $e;
+        }
+    }
+
+    /// -- 6. FINALIZE START GROUPS --
+    // Discriminator: [56, 19, 3, 166, 223, 164, 105, 30]
+
     // Build data
-    $finalizeStartGroupAssetDiscriminator = chr(122) . chr(206) . chr(104) . chr(17) . chr(125) . chr(66) . chr(221) . chr(196);
-    $finalizeStartGroupAssetData = $finalizeStartGroupAssetDiscriminator;
+    $finalizeStartGroupsDiscriminator = chr(56) . chr(19) . chr(3) . chr(166) . chr(223) . chr(164) . chr(105) . chr(30);
+    $finalizeStartGroupsData = $finalizeStartGroupsDiscriminator;
 
     // Context accounts
     $keys = [
@@ -341,10 +399,16 @@ test('Group Round Tests', function () {
     ];
 
     // Remaining accounts
-    $keys[] = new AccountMeta($assetPda, false, true);
+    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    $remainingAccountsFinalizeStartGroups = [];
+    for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
+        $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
+        $remainingAccountsFinalizeStartGroups[] = new AccountMeta($groupAssetPda, false, false);
+    }
+    $keys = array_merge($keys, $remainingAccountsFinalizeStartGroups);
 
     // Instruction
-    $ix = new TransactionInstruction($env->programId, $keys, $finalizeStartGroupAssetData);
+    $ix = new TransactionInstruction($env->programId, $keys, $finalizeStartGroupsData);
     $tx = new Transaction();
     $tx->feePayer = $env->keeper->getPublicKey();
     $tx->add($ix);
@@ -356,29 +420,26 @@ test('Group Round Tests', function () {
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
-        echo "Finalize Start Group Asset Simulation Result: " . json_encode($simResult) . "\n";
+        echo "Finalize Start Groups Simulation Result: " . json_encode($simResult) . "\n";
 
         // Only send if simulation is successfully
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
-            $sig = $conn->sendTransaction($tx, [$env->admin]);
-            echo "Finalize Start Group Asset Transaction: " . $env->rpcUrl . '?sig=' . $sig . "\n";
+            $sig = $conn->sendTransaction($tx, [$env->keeper]);
+            echo "Finalize Start Groups Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
             // wait for transaction confirmation
-            sleep(10);
+            sleep(15);
         } else {
-            throw new Exception('Finalize Start Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
+            throw new Exception('Finalize Start Groups simulation failed: ' . json_encode($simResult['value']['err']));
         }
 
         expect(is_string($sig))->toBeTrue();
         expect(strlen($sig))->toBeGreaterThan(10);
     } catch (Exception $e) {
-        echo "Finalize Start Group Asset Error: " . $e->getMessage() . "\n";
+        echo "Finalize Start Groups Error: " . $e->getMessage() . "\n";
         echo "Error Class: " . get_class($e) . "\n";
         throw $e;
     }
-
-    /// -- 6. FINALIZE START GROUPS --
-    // Discriminator: [56, 19, 3, 166, 223, 164, 105, 30]
 
     /// -- 7. START ROUND --
     // Discriminator: [144, 144, 43, 7, 193, 42, 217, 215]

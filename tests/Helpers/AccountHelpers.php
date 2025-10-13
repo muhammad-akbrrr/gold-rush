@@ -196,17 +196,29 @@ class AccountHelpers
         $status = unpack('C', substr($bin, $off, 1))[1];
         $off += 1;
 
-        // startPrice optional (u64)
-        $startPriceBytes = substr($bin, $off, 8);
-        $startPrice = unpack('V2', $startPriceBytes);
-        $startPrice = $startPrice[1] + ($startPrice[2] << 32);
-        $off += 8;
+        // startPrice (Option<u64>)
+        $startPriceOption = unpack('C', substr($bin, $off, 1))[1];
+        $off += 1;
+        if ($startPriceOption == 1) { // Some
+            $startPriceBytes = substr($bin, $off, 8);
+            $startPrice = unpack('V2', $startPriceBytes);
+            $startPrice = $startPrice[1] + ($startPrice[2] << 32);
+            $off += 8;
+        } else { // None
+            $startPrice = null;
+        }
 
-        // finalPrice optional (u64)
-        $finalPriceBytes = substr($bin, $off, 8);
-        $finalPrice = unpack('V2', $finalPriceBytes);
-        $finalPrice = $finalPrice[1] + ($finalPrice[2] << 32);
-        $off += 8;
+        // finalPrice (Option<u64>)
+        $finalPriceOption = unpack('C', substr($bin, $off, 1))[1];
+        $off += 1;
+        if ($finalPriceOption == 1) { // Some
+            $finalPriceBytes = substr($bin, $off, 8);
+            $finalPrice = unpack('V2', $finalPriceBytes);
+            $finalPrice = $finalPrice[1] + ($finalPrice[2] << 32);
+            $off += 8;
+        } else { // None
+            $finalPrice = null;
+        }
 
         // totalPool (u64)
         $totalPoolBytes = substr($bin, $off, 8);
@@ -286,11 +298,17 @@ class AccountHelpers
         $createdAt = $createdAt[1] + ($createdAt[2] << 32);
         $off += 8;
 
-        // settledAt optional (i64)
-        $settledAtBytes = substr($bin, $off, 8);
-        $settledAt = unpack('V2', $settledAtBytes);
-        $settledAt = $settledAt[1] + ($settledAt[2] << 32);
-        $off += 8;
+        // settledAt (Option<i64>)
+        $settledAtOption = unpack('C', substr($bin, $off, 1))[1];
+        $off += 1;
+        if ($settledAtOption == 1) { // Some
+            $settledAtBytes = substr($bin, $off, 8);
+            $settledAt = unpack('V2', $settledAtBytes);
+            $settledAt = $settledAt[1] + ($settledAt[2] << 32);
+            $off += 8;
+        } else { // None
+            $settledAt = null;
+        }
 
         // bump (u8)
         $bump = unpack('C', substr($bin, $off, 1))[1];
@@ -320,6 +338,177 @@ class AccountHelpers
             'capturedEndGroups' => $capturedEndGroups,
             'createdAt' => $createdAt,
             'settledAt' => $settledAt,
+            'bump' => $bump,
+        ];
+    }
+
+    /**
+     * Fetch and parse group asset account
+     */
+    public static function fetchGroupAssetAccount(Connection $conn, PublicKey $groupAssetPda): object
+    {
+        // Get account data
+        $groupAssetAccountInfo = $conn->getAccountInfo($groupAssetPda);
+        if (!$groupAssetAccountInfo || !isset($groupAssetAccountInfo['data'])) {
+            throw new Exception('Group asset account not found');
+        }
+
+        // Parse data
+        $groupAssetDataField = $groupAssetAccountInfo['data'];
+        if (is_array($groupAssetDataField)) {
+            $rawData = $groupAssetDataField[0] ?? '';
+            $encoding = $groupAssetDataField[1] ?? 'base64';
+        } else {
+            $rawData = $groupAssetDataField;
+            $encoding = 'base64';
+        }
+        $bin = $encoding === 'base64' ? base64_decode((string) $rawData) : (string) $rawData;
+
+        // Parse fields
+        $off = 0;
+
+        // discriminator (8 bytes)
+        $off += 8;
+
+        // id (u64)
+        $idBytes = substr($bin, $off, 8);
+        $id = unpack('V2', $idBytes);
+        $id = $id[1] + ($id[2] << 32);
+        $off += 8;
+
+        // round (pubkey - 32 bytes)
+        $roundBytes = substr($bin, $off, 32);
+        $off += 32;
+
+        // symbol (array [u8; 8] - 8 bytes)
+        $symbolBytes = substr($bin, $off, 8);
+        $symbol = '';
+        for ($i = 0; $i < 8; $i++) {
+            $byte = ord($symbolBytes[$i]);
+            if ($byte !== 0) { // Skip null bytes
+                $symbol .= chr($byte);
+            }
+        }
+        $off += 8;
+
+        // totalAssets (u64)
+        $totalAssetsBytes = substr($bin, $off, 8);
+        $totalAssets = unpack('V2', $totalAssetsBytes);
+        $totalAssets = $totalAssets[1] + ($totalAssets[2] << 32);
+        $off += 8;
+
+        // totalFinalPrice (u64)
+        $totalFinalPriceBytes = substr($bin, $off, 8);
+        $totalFinalPrice = unpack('V2', $totalFinalPriceBytes);
+        $totalFinalPrice = $totalFinalPrice[1] + ($totalFinalPrice[2] << 32);
+        $off += 8;
+
+        // totalGrowthRateBps (i64)
+        $totalGrowthRateBpsBytes = substr($bin, $off, 8);
+        $totalGrowthRateBps = unpack('V2', $totalGrowthRateBpsBytes);
+        $totalGrowthRateBps = $totalGrowthRateBps[1] + ($totalGrowthRateBps[2] << 32);
+        // Convert to signed if needed (handle negative values)
+        if ($totalGrowthRateBps > 0x7FFFFFFFFFFFFFFF) {
+            $totalGrowthRateBps -= 0x10000000000000000;
+        }
+        $off += 8;
+
+        // capturedStartPriceAssets (u64)
+        $capturedStartPriceAssetsBytes = substr($bin, $off, 8);
+        $capturedStartPriceAssets = unpack('V2', $capturedStartPriceAssetsBytes);
+        $capturedStartPriceAssets = $capturedStartPriceAssets[1] + ($capturedStartPriceAssets[2] << 32);
+        $off += 8;
+
+        // capturedEndPriceAssets (u64)
+        $capturedEndPriceAssetsBytes = substr($bin, $off, 8);
+        $capturedEndPriceAssets = unpack('V2', $capturedEndPriceAssetsBytes);
+        $capturedEndPriceAssets = $capturedEndPriceAssets[1] + ($capturedEndPriceAssets[2] << 32);
+        $off += 8;
+
+        // avgGrowthRateBps (Option<i64>)
+        $avgGrowthRateBpsOption = unpack('C', substr($bin, $off, 1))[1];
+        $off += 1;
+        if ($avgGrowthRateBpsOption == 1) { // Some
+            $avgGrowthRateBpsBytes = substr($bin, $off, 8);
+            $avgGrowthRateBps = unpack('V2', $avgGrowthRateBpsBytes);
+            $avgGrowthRateBps = $avgGrowthRateBps[1] + ($avgGrowthRateBps[2] << 32);
+            // Convert to signed if needed
+            if ($avgGrowthRateBps > 0x7FFFFFFFFFFFFFFF) {
+                $avgGrowthRateBps -= 0x10000000000000000;
+            }
+            $off += 8;
+        } else { // None
+            $avgGrowthRateBps = null;
+        }
+
+        // finalizedStartPriceAssets (u64)
+        $finalizedStartPriceAssetsBytes = substr($bin, $off, 8);
+        $finalizedStartPriceAssets = unpack('V2', $finalizedStartPriceAssetsBytes);
+        $finalizedStartPriceAssets = $finalizedStartPriceAssets[1] + ($finalizedStartPriceAssets[2] << 32);
+        $off += 8;
+
+        // finalizedEndPriceAssets (u64)
+        $finalizedEndPriceAssetsBytes = substr($bin, $off, 8);
+        $finalizedEndPriceAssets = unpack('V2', $finalizedEndPriceAssetsBytes);
+        $finalizedEndPriceAssets = $finalizedEndPriceAssets[1] + ($finalizedEndPriceAssets[2] << 32);
+        $off += 8;
+
+        // settledAssets (u64)
+        $settledAssetsBytes = substr($bin, $off, 8);
+        $settledAssets = unpack('V2', $settledAssetsBytes);
+        $settledAssets = $settledAssets[1] + ($settledAssets[2] << 32);
+        $off += 8;
+
+        // createdAt (i64)
+        $createdAtBytes = substr($bin, $off, 8);
+        $createdAt = unpack('V2', $createdAtBytes);
+        $createdAt = $createdAt[1] + ($createdAt[2] << 32);
+        $off += 8;
+
+        // startPriceAt (Option<i64>)
+        $startPriceAtOption = unpack('C', substr($bin, $off, 1))[1];
+        $off += 1;
+        if ($startPriceAtOption == 1) { // Some
+            $startPriceAtBytes = substr($bin, $off, 8);
+            $startPriceAt = unpack('V2', $startPriceAtBytes);
+            $startPriceAt = $startPriceAt[1] + ($startPriceAt[2] << 32);
+            $off += 8;
+        } else { // None
+            $startPriceAt = null;
+        }
+
+        // finalizedPriceAt (Option<i64>)
+        $finalizedPriceAtOption = unpack('C', substr($bin, $off, 1))[1];
+        $off += 1;
+        if ($finalizedPriceAtOption == 1) { // Some
+            $finalizedPriceAtBytes = substr($bin, $off, 8);
+            $finalizedPriceAt = unpack('V2', $finalizedPriceAtBytes);
+            $finalizedPriceAt = $finalizedPriceAt[1] + ($finalizedPriceAt[2] << 32);
+            $off += 8;
+        } else { // None
+            $finalizedPriceAt = null;
+        }
+
+        // bump (u8)
+        $bump = unpack('C', substr($bin, $off, 1))[1];
+        $off += 1;
+
+        return (object) [
+            'id' => $id,
+            'round' => $roundBytes,
+            'symbol' => $symbol,
+            'totalAssets' => $totalAssets,
+            'totalFinalPrice' => $totalFinalPrice,
+            'totalGrowthRateBps' => $totalGrowthRateBps,
+            'capturedStartPriceAssets' => $capturedStartPriceAssets,
+            'capturedEndPriceAssets' => $capturedEndPriceAssets,
+            'avgGrowthRateBps' => $avgGrowthRateBps,
+            'finalizedStartPriceAssets' => $finalizedStartPriceAssets,
+            'finalizedEndPriceAssets' => $finalizedEndPriceAssets,
+            'settledAssets' => $settledAssets,
+            'createdAt' => $createdAt,
+            'startPriceAt' => $startPriceAt,
+            'finalizedPriceAt' => $finalizedPriceAt,
             'bump' => $bump,
         ];
     }
