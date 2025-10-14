@@ -691,6 +691,66 @@ test('Group Round Tests', function () {
     /// -- 10. FINALIZE END GROUP ASSETS --
     // Discriminator: [11, 196, 212, 158, 225, 111, 94, 122]
 
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
+    for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
+        $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
+
+        // Build data
+        $finalizeEndGroupAssetDiscriminator = chr(11) . chr(196) . chr(212) . chr(158) . chr(225) . chr(111) . chr(94) . chr(122);
+        $finalizeEndGroupAssetData = $finalizeEndGroupAssetDiscriminator;
+
+        // Context accounts
+        $keys = [
+            new AccountMeta($env->keeper->getPublicKey(), true, true),
+            new AccountMeta($configPda, false, false),
+            new AccountMeta($roundPda, false, false),
+            new AccountMeta($groupAssetPda, false, true),
+            new AccountMeta($env->systemProgramId, false, false),
+        ];
+
+        // Remaining accounts
+        $remainingAccounts = [];
+        $groupAsset = AccountHelpers::fetchGroupAssetAccount($client, $groupAssetPda);
+        for ($assetId = 1; $assetId <= $groupAsset->totalAssets; $assetId++) {
+            $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
+            $remainingAccounts[] = new AccountMeta($assetPda, false, true);
+        }
+        $keys = array_merge($keys, $remainingAccounts);
+
+        // Instruction
+        $ix = new TransactionInstruction($env->programId, $keys, $finalizeEndGroupAssetData);
+        $tx = new Transaction();
+        $tx->feePayer = $env->keeper->getPublicKey();
+        $tx->add($ix);
+
+        try {
+            // Recent blockhash
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
+
+            // Simulate transaction
+            $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
+            echo "Finalize End Group Asset Simulation Result: " . json_encode($simResult) . "\n";
+
+            // Only send if simulation is successfully
+            if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+                $sig = $conn->sendTransaction($tx, [$env->admin]);
+                echo "Finalize End Group Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+                // Wait for transaction confirmation
+                TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
+            } else {
+                throw new Exception('Finalize End Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
+            }
+
+            expect(is_string($sig))->toBeTrue();
+            expect(strlen($sig))->toBeGreaterThan(10);
+        } catch (Exception $e) {
+            echo "Finalize End Group Asset Error: " . $e->getMessage() . "\n";
+            echo "Error Class: " . get_class($e) . "\n";
+            throw $e;
+        }
+    }
 
     /// -- 11. FINALIZE END GROUPS --
     // Discriminator: [135, 108, 53, 26, 184, 143, 250, 65]
