@@ -10,6 +10,7 @@ require_once __DIR__ . '/../Helpers/AccountHelpers.php';
 require_once __DIR__ . '/../Helpers/Env.php';
 require_once __DIR__ . '/../Helpers/PdaHelpers.php';
 require_once __DIR__ . '/../Helpers/PythHelpers.php';
+require_once __DIR__ . '/../Helpers/TxHelpers.php';
 require_once __DIR__ . '/../Helpers/UrlHelpers.php';
 require_once __DIR__ . '/../Helpers/WalletHelpers.php';
 
@@ -49,7 +50,7 @@ test('Single Asset Round Tests', function () {
     $configPda = PdaHelpers::deriveConfigPda($env->programId);
 
     // Get next round ID
-    $config = AccountHelpers::fetchConfigAccount($conn, $configPda);
+    $config = AccountHelpers::fetchConfigAccount($client, $configPda);
     $currentRoundId = $config->currentRoundCounter;
     $nextRoundId = $currentRoundId + 1;
 
@@ -94,8 +95,8 @@ test('Single Asset Round Tests', function () {
 
     try {
         // Recent blockhash
-        $recentBlockhash = $conn->getRecentBlockhash();
-        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+        $latestBlockhash = $conn->getLatestBlockhash();
+        $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$env->admin]);
@@ -106,8 +107,8 @@ test('Single Asset Round Tests', function () {
             $sig = $conn->sendTransaction($tx, [$env->admin]);
             echo "Create Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-            // Wait for transaction confirmation (simplified approach)
-            sleep(5);
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
         } else {
             throw new Exception('Create Round simulation failed: ' . json_encode($simResult['value']['err']));
         }
@@ -152,8 +153,8 @@ test('Single Asset Round Tests', function () {
     while (true) {
         try {
             // Recent blockhash
-            $recentBlockhash = $conn->getRecentBlockhash();
-            $tx->recentBlockhash = $recentBlockhash['blockhash'];
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
             // Simulate transaction first
             $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
@@ -198,34 +199,7 @@ test('Single Asset Round Tests', function () {
             expect(strlen($sig))->toBeGreaterThan(10);
 
             // Wait for Start Round to complete and verify status change
-            echo "Waiting for Start Round confirmation...\n";
-            sleep(2);
-
-            // Verify that round status actually changed to Started (1)
-            $maxStatusWait = 10; // 10 seconds
-            $statusWaitStart = time();
-            $roundStarted = false;
-
-            while (time() - $statusWaitStart < $maxStatusWait) {
-                try {
-                    $roundData = AccountHelpers::fetchRoundAccount($conn, $roundPda);
-                    echo "Checking round status after Start Round: " . $roundData->status . "\n";
-
-                    if ($roundData->status == 1) {
-                        echo "Round successfully started!\n";
-                        $roundStarted = true;
-                        break;
-                    }
-                } catch (Exception $e) {
-                    // Continue waiting
-                }
-                sleep(1);
-            }
-
-            if (!$roundStarted) {
-                echo "WARNING: Start Round transaction succeeded but round status did not change to Started (1). Proceeding anyway...\n";
-                // Don't throw exception, continue with Place Bet to see if it works
-            }
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
 
             // Success! Break out of retry loop
             break;
@@ -244,7 +218,7 @@ test('Single Asset Round Tests', function () {
     $configPda = PdaHelpers::deriveConfigPda($env->programId);
 
     // Get next bet ID
-    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
     $currentBetId = $round->totalBets;
     $nextBetId = $currentBetId + 1;
 
@@ -288,8 +262,8 @@ test('Single Asset Round Tests', function () {
 
     try {
         // Recent blockhash
-        $recentBlockhash = $conn->getRecentBlockhash();
-        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+        $latestBlockhash = $conn->getLatestBlockhash();
+        $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$env->user]);
@@ -300,9 +274,8 @@ test('Single Asset Round Tests', function () {
             $sig = $conn->sendTransaction($tx, [$env->user]);
             echo "Place Bet Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-            // Wait for transaction confirmation (simplified approach)
-            echo "Waiting for Place Bet confirmation...\n";
-            sleep(5);
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
         } else {
             throw new Exception('Place Bet Simulation failed: ' . json_encode($simResult['value']['err']));
         }
@@ -360,8 +333,8 @@ test('Single Asset Round Tests', function () {
     while (true) {
         try {
             // Recent blockhash
-            $recentBlockhash = $conn->getRecentBlockhash();
-            $tx->recentBlockhash = $recentBlockhash['blockhash'];
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
             // Simulate transaction
             $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
@@ -394,9 +367,8 @@ test('Single Asset Round Tests', function () {
             expect(is_string($sig))->toBeTrue();
             expect(strlen($sig))->toBeGreaterThan(10);
 
-            // Delay for waiting confirmation
-            echo "Waiting for Settle Round confirmation...\n";
-            sleep(5);
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
 
             break;
         } catch (Exception $e) {
@@ -435,8 +407,8 @@ test('Single Asset Round Tests', function () {
 
     try {
         // Recent blockhash
-        $recentBlockhash = $conn->getRecentBlockhash();
-        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+        $latestBlockhash = $conn->getLatestBlockhash();
+        $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$env->user]);
@@ -446,6 +418,9 @@ test('Single Asset Round Tests', function () {
         if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
             $sig = $conn->sendTransaction($tx, [$env->user]);
             echo "Claim Reward Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
         } else {
             throw new Exception('Claim Reward Simulation failed: ' . json_encode($simResult['value']['err']));
         }

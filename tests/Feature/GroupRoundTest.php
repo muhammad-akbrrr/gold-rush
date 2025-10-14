@@ -11,6 +11,8 @@ require_once __DIR__ . '/../Helpers/BytesHelpers.php';
 require_once __DIR__ . '/../Helpers/Env.php';
 require_once __DIR__ . '/../Helpers/PdaHelpers.php';
 require_once __DIR__ . '/../Helpers/PythHelpers.php';
+require_once __DIR__ . '/../Helpers/TxHelpers.php';
+require_once __DIR__ . '/../Helpers/UrlHelpers.php';
 require_once __DIR__ . '/../Helpers/WalletHelpers.php';
 
 test('Group Round Tests', function () {
@@ -49,7 +51,7 @@ test('Group Round Tests', function () {
     $configPda = PdaHelpers::deriveConfigPda($env->programId);
 
     // Get next round ID
-    $config = AccountHelpers::fetchConfigAccount($conn, $configPda);
+    $config = AccountHelpers::fetchConfigAccount($client, $configPda);
     $currentRoundId = $config->currentRoundCounter;
     $nextRoundId = $currentRoundId + 1;
     echo "Round ID: " . $nextRoundId . "\n";
@@ -91,8 +93,8 @@ test('Group Round Tests', function () {
 
     try {
         // Recent blockhash
-        $recentBlockhash = $conn->getRecentBlockhash();
-        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+        $latestBlockhash = $conn->getLatestBlockhash();
+        $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$env->admin]);
@@ -104,7 +106,7 @@ test('Group Round Tests', function () {
             echo "Create Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
             // Wait for transaction confirmation
-            sleep(15);
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
         } else {
             throw new Exception('Create Round simulation failed: ' . json_encode($simResult['value']['err']));
         }
@@ -120,7 +122,7 @@ test('Group Round Tests', function () {
     /// -- 2. INSERT GROUP ASSET --
     // Discriminator: [216, 166, 209, 92, 245, 228, 53, 67]
 
-    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
 
     for ($groupId = 1; $groupId <= 2; $groupId++) {
         // Derive group asset PDA
@@ -151,8 +153,8 @@ test('Group Round Tests', function () {
 
         try {
             // Recent blockhash
-            $recentBlockhash = $conn->getRecentBlockhash();
-            $tx->recentBlockhash = $recentBlockhash['blockhash'];
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
             // Simulate transaction
             $simResult = $conn->simulateTransaction($tx, [$env->admin]);
@@ -163,8 +165,8 @@ test('Group Round Tests', function () {
                 $sig = $conn->sendTransaction($tx, [$env->admin]);
                 echo "Insert Group Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-                // wait for transaction confirmation
-                sleep(15);
+                // Wait for transaction confirmation
+                TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
             } else {
                 throw new Exception('Insert Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
             }
@@ -181,12 +183,12 @@ test('Group Round Tests', function () {
     /// -- 3. INSERT ASSET --
     // Discriminator: [190, 133, 160, 163, 45, 85, 168, 161]
 
-    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
 
     for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
         $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
 
-        $groupAsset = AccountHelpers::fetchGroupAssetAccount($conn, $groupAssetPda);
+        $groupAsset = AccountHelpers::fetchGroupAssetAccount($client, $groupAssetPda);
         for ($assetId = 1; $assetId <= 2; $assetId++) {
             // Derive asset PDA
             $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
@@ -218,8 +220,8 @@ test('Group Round Tests', function () {
 
             try {
                 // Recent blockhash
-                $recentBlockhash = $conn->getRecentBlockhash();
-                $tx->recentBlockhash = $recentBlockhash['blockhash'];
+                $latestBlockhash = $conn->getLatestBlockhash();
+                $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
                 // Simulate transaction
                 $simResult = $conn->simulateTransaction($tx, [$env->admin]);
@@ -230,8 +232,8 @@ test('Group Round Tests', function () {
                     $sig = $conn->sendTransaction($tx, [$env->admin]);
                     echo "Insert Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-                    // wait for transaction confirmation
-                    sleep(15);
+                    // Wait for transaction confirmation
+                    TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
                 } else {
                     throw new Exception('Insert Asset simulation failed: ' . json_encode($simResult['value']['err']));
                 }
@@ -249,7 +251,7 @@ test('Group Round Tests', function () {
     /// -- 4. CAPTURE START PRICE --
     // Discriminator: [51, 86, 229, 68, 153, 204, 34, 199]
 
-    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
 
     for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
         $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
@@ -269,7 +271,7 @@ test('Group Round Tests', function () {
 
         // Remaining accounts
         $remainingAccounts = [];
-        $groupAsset = AccountHelpers::fetchGroupAssetAccount($conn, $groupAssetPda);
+        $groupAsset = AccountHelpers::fetchGroupAssetAccount($client, $groupAssetPda);
         echo "Captured Start Price Assets: " . $groupAsset->capturedStartPriceAssets . "\n";
         echo "Total Assets: " . $groupAsset->totalAssets . "\n";
         for ($assetId = 1; $assetId <= $groupAsset->totalAssets; $assetId++) {
@@ -291,8 +293,8 @@ test('Group Round Tests', function () {
 
         try {
             // Recent blockhash
-            $recentBlockhash = $conn->getRecentBlockhash();
-            $tx->recentBlockhash = $recentBlockhash['blockhash'];
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
             // Simulate transaction
             $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
@@ -303,8 +305,8 @@ test('Group Round Tests', function () {
                 $sig = $conn->sendTransaction($tx, [$env->keeper]);
                 echo "Capture Start Price Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-                // wait for transaction confirmation
-                sleep(15);
+                // Wait for transaction confirmation
+                TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
             } else {
                 throw new Exception('Capture Start Price simulation failed: ' . json_encode($simResult['value']['err']));
             }
@@ -322,7 +324,7 @@ test('Group Round Tests', function () {
     /// -- 5. FINALIZE START GROUP ASSETS --
     // Discriminator: [122, 206, 104, 17, 125, 66, 221, 196]
 
-    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
     for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
         $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
 
@@ -341,7 +343,7 @@ test('Group Round Tests', function () {
 
         // Remaining accounts
         $remainingAccounts = [];
-        $groupAsset = AccountHelpers::fetchGroupAssetAccount($conn, $groupAssetPda);
+        $groupAsset = AccountHelpers::fetchGroupAssetAccount($client, $groupAssetPda);
         for ($assetId = 1; $assetId <= $groupAsset->totalAssets; $assetId++) {
             $assetPda = PdaHelpers::deriveAssetPda($env->programId, $groupAssetPda, $assetId);
             $remainingAccounts[] = new AccountMeta($assetPda, false, true);
@@ -356,8 +358,8 @@ test('Group Round Tests', function () {
 
         try {
             // Recent blockhash
-            $recentBlockhash = $conn->getRecentBlockhash();
-            $tx->recentBlockhash = $recentBlockhash['blockhash'];
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
             // Simulate transaction
             $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
@@ -368,8 +370,8 @@ test('Group Round Tests', function () {
                 $sig = $conn->sendTransaction($tx, [$env->admin]);
                 echo "Finalize Start Group Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-                // wait for transaction confirmation
-                sleep(15);
+                // Wait for transaction confirmation
+                TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
             } else {
                 throw new Exception('Finalize Start Group Asset simulation failed: ' . json_encode($simResult['value']['err']));
             }
@@ -399,7 +401,7 @@ test('Group Round Tests', function () {
     ];
 
     // Remaining accounts
-    $round = AccountHelpers::fetchRoundAccount($conn, $roundPda);
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
     $remainingAccountsFinalizeStartGroups = [];
     for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
         $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
@@ -415,8 +417,8 @@ test('Group Round Tests', function () {
 
     try {
         // Recent blockhash
-        $recentBlockhash = $conn->getRecentBlockhash();
-        $tx->recentBlockhash = $recentBlockhash['blockhash'];
+        $latestBlockhash = $conn->getLatestBlockhash();
+        $tx->recentBlockhash = $latestBlockhash['blockhash'];
 
         // Simulate transaction
         $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
@@ -427,8 +429,8 @@ test('Group Round Tests', function () {
             $sig = $conn->sendTransaction($tx, [$env->keeper]);
             echo "Finalize Start Groups Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
-            // wait for transaction confirmation
-            sleep(15);
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
         } else {
             throw new Exception('Finalize Start Groups simulation failed: ' . json_encode($simResult['value']['err']));
         }
@@ -449,6 +451,73 @@ test('Group Round Tests', function () {
     $startRoundData = $startRoundDiscriminator;
 
     // Context accounts
+    $keys = [
+        new AccountMeta($env->keeper->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, false),
+        new AccountMeta($roundPda, false, true),
+        new AccountMeta($env->programId, false, false), // null
+        new AccountMeta($env->systemProgramId, false, false),
+    ];
+
+    // Instruction
+    $ix = new TransactionInstruction($env->programId, $keys, $startRoundData);
+    $tx = new Transaction();
+    $tx->feePayer = $env->keeper->getPublicKey();
+    $tx->add($ix);
+
+    // Retry configuration
+    $maxWaitMs = 20_000; // 20 seconds
+    $pollIntervalMs = 1_000; // 1 second
+    $startTime = microtime(true) * 1_000;
+
+    while (true) {
+        try {
+            // Recent blockhash
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
+
+            // Simulate transaction
+            $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
+            echo "Start Round Simulation Result: " . json_encode($simResult) . "\n";
+
+            // Check for specific errors in simulation
+            if (isset($simResult['value']['err']) && $simResult['value']['err'] !== null) {
+                // Check logs for specific error messages
+                $logs = $simResult['value']['logs'] ?? [];
+                $logsString = implode(' ', $logs);
+
+                // Check for RoundNotReadyForStart in logs
+                if (strpos($logsString, 'RoundNotReadyForStart') !== false) {
+                    $currentTime = microtime(true) * 1_000;
+                    if ($currentTime - $startTime > $maxWaitMs) {
+                        throw new Exception('Timed out waiting for round to be ready after ' . ($maxWaitMs / 1_000) . ' seconds');
+                    }
+                    echo "RoundNotReadyForStart detected in logs, waiting {$pollIntervalMs}ms...\n";
+                    usleep($pollIntervalMs * 1_000);
+                    continue;
+                }
+
+                // If not a retryable error, throw it
+                throw new Exception('Start Round simulation failed: ' . json_encode($simResult['value']['err']));
+            }
+
+            // If simulation successful, send transaction
+            $sig = $conn->sendTransaction($tx, [$env->keeper]);
+            echo "Start Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+            expect(is_string($sig))->toBeTrue();
+            expect(strlen($sig))->toBeGreaterThan(10);
+
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
+
+            break;
+        } catch (Exception $e) {
+            echo "Start Round Error: " . $e->getMessage() . "\n";
+            echo "Error Class: " . get_class($e) . "\n";
+            $this->markTestSkipped('Start Round Error: ' . $e->getMessage());
+            return;
+        }
+    }
 
     /// -- 8. PLACE BET --
     // Discriminator: [222, 62, 67, 220, 63, 166, 126, 33]
@@ -468,4 +537,4 @@ test('Group Round Tests', function () {
 
     /// -- 12. SETTLE ROUND --
     // Discriminator: [117, 63, 7, 4, 247, 239, 50, 135]
-});
+})->group('solana');

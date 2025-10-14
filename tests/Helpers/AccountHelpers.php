@@ -2,6 +2,9 @@
 
 use Attestto\SolanaPhpSdk\PublicKey;
 use Attestto\SolanaPhpSdk\Connection;
+use Attestto\SolanaPhpSdk\SolanaRpcClient;
+
+require_once __DIR__ . '/TxHelpers.php';
 
 /**
  * Helpers functions to parse account from Solana
@@ -11,10 +14,10 @@ class AccountHelpers
     /**
      * Fetch and parse confif account
      */
-    public static function fetchConfigAccount(Connection $conn, PublicKey $configPda): object
+    public static function fetchConfigAccount(SolanaRpcClient $client, PublicKey $configPda): object
     {
         // Gets account data
-        $configAccountInfo = $conn->getAccountInfo($configPda);
+        $configAccountInfo = TxHelpers::getAccountInfoWithCommitment($client, $configPda);
         if (!$configAccountInfo || !isset($configAccountInfo['data'])) {
             throw new Exception('Config account not found');
         }
@@ -131,10 +134,10 @@ class AccountHelpers
     /**
      * Fetch and parse round account
      */
-    public static function fetchRoundAccount(Connection $conn, PublicKey $roundPda): object
+    public static function fetchRoundAccount(SolanaRpcClient $client, PublicKey $roundPda): object
     {
         // Get account data
-        $roundAccountInfo = $conn->getAccountInfo($roundPda);
+        $roundAccountInfo = TxHelpers::getAccountInfoWithCommitment($client, $roundPda);
         if (!$roundAccountInfo || !isset($roundAccountInfo['data'])) {
             throw new Exception('Round account not found');
         }
@@ -345,10 +348,10 @@ class AccountHelpers
     /**
      * Fetch and parse group asset account
      */
-    public static function fetchGroupAssetAccount(Connection $conn, PublicKey $groupAssetPda): object
+    public static function fetchGroupAssetAccount(SolanaRpcClient $client, PublicKey $groupAssetPda): object
     {
         // Get account data
-        $groupAssetAccountInfo = $conn->getAccountInfo($groupAssetPda);
+        $groupAssetAccountInfo = TxHelpers::getAccountInfoWithCommitment($client, $groupAssetPda);
         if (!$groupAssetAccountInfo || !isset($groupAssetAccountInfo['data'])) {
             throw new Exception('Group asset account not found');
         }
