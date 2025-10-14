@@ -65,7 +65,7 @@ test('Group Round Tests', function () {
     // Arguments
     $maketType = '1'; // group battle
     $startTime = time() + 3; // 3 seconds from now
-    $endTime = $startTime + 30; // 30 seconds
+    $endTime = $startTime + 90; // 90 seconds
 
     // Build data
     $marketBuf = pack('C', $maketType);
@@ -522,6 +522,73 @@ test('Group Round Tests', function () {
     /// -- 8. PLACE BET --
     // Discriminator: [222, 62, 67, 220, 63, 166, 126, 33]
 
+    // Get next bet ID
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
+    $currentBetId = $round->totalBets;
+    $nextBetId = $currentBetId + 1;
+
+    // Derive bet PDA
+    $betPda = PdaHelpers::deriveBetPda($env->programId, $roundPda, $nextBetId);
+
+    // Derive group asset PDA
+    $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, 1); // first group
+
+    // Arguments
+    $amount = 1_000_000; // 1 Token
+    $direction = 1; // down
+
+    // Build data
+    $placeBetDiscriminator = chr(222) . chr(62) . chr(67) . chr(220) . chr(63) . chr(166) . chr(126) . chr(33);
+    $low32 = $amount & 0xFFFFFFFF;
+    $high32 = ($amount >> 32) & 0xFFFFFFFF;
+    $amountBuf = pack('V2', $low32, $high32);
+    $directionBuf = pack('C', $direction);
+    $placeBetData = $placeBetDiscriminator . $amountBuf . $directionBuf;
+
+    // Context accounts
+    $keys = [
+        new AccountMeta($env->user->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, true),
+        new AccountMeta($roundPda, false, true),
+        new AccountMeta($groupAssetPda, false, false),
+        new AccountMeta($betPda, false, true),
+        new AccountMeta($vaultPda, false, true),
+        new AccountMeta($userTokenAccount, false, true),
+        new AccountMeta($env->mint, false, false),
+        new AccountMeta($env->tokenProgramId, false, false),
+        new AccountMeta($env->systemProgramId, false, false),
+    ];
+
+    // Instruction
+    $ix = new TransactionInstruction($env->programId, $keys, $placeBetData);
+    $tx = new Transaction();
+    $tx->feePayer = $env->user->getPublicKey();
+    $tx->add($ix);
+
+    try {
+        // Recent blockhash
+        $latestBlockhash = $conn->getLatestBlockhash();
+        $tx->recentBlockhash = $latestBlockhash['blockhash'];
+
+        // Simulate transaction
+        $simResult = $conn->simulateTransaction($tx, [$env->user]);
+        echo "Place Bet Simulation Result: " . json_encode($simResult) . "\n";
+
+        // Only send if simulation is successfully
+        if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+            $sig = $conn->sendTransaction($tx, [$env->user]);
+            echo "Place Bet Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
+        } else {
+            throw new Exception('Place Bet simulation failed: ' . json_encode($simResult['value']['err']));
+        }
+    } catch (Exception $e) {
+        echo "Place Bet Error: " . $e->getMessage() . "\n";
+        echo "Error Class: " . get_class($e) . "\n";
+        throw $e;
+    }
 
     /// -- 9. CAPTURE END PRICE --
     // Discriminator: [116, 44, 170, 74, 105, 109, 182, 246]
