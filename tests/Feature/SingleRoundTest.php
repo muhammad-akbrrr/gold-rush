@@ -7,7 +7,7 @@ use Attestto\SolanaPhpSdk\SolanaRpcClient;
 use Attestto\SolanaPhpSdk\Connection;
 
 require_once __DIR__ . '/../Helpers/AccountHelpers.php';
-require_once __DIR__ . '/../Helpers/Env.php';
+require_once __DIR__ . '/../Helpers/EnvHelpers.php';
 require_once __DIR__ . '/../Helpers/PdaHelpers.php';
 require_once __DIR__ . '/../Helpers/PythHelpers.php';
 require_once __DIR__ . '/../Helpers/TxHelpers.php';
@@ -17,7 +17,7 @@ require_once __DIR__ . '/../Helpers/WalletHelpers.php';
 test('Single Asset Round Tests', function () {
     /// -- SETUP --
     // load env
-    $env = Env::loadAllEnv();
+    $env = EnvHelpers::loadAllEnv();
 
     // Token account
     $userTokenAccount = PdaHelpers::deriveTokenAccountPda(

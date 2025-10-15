@@ -1307,46 +1307,6 @@
       ]
     },
     {
-      "name": "pauseProgram",
-      "discriminator": [
-        91,
-        86,
-        253,
-        175,
-        66,
-        236,
-        172,
-        124
-      ],
-      "accounts": [
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "config",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  111,
-                  110,
-                  102,
-                  105,
-                  103
-                ]
-              }
-            ]
-          }
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "placeBet",
       "discriminator": [
         222,
@@ -1551,6 +1511,86 @@
           }
         }
       ]
+    },
+    {
+      "name": "programPause",
+      "discriminator": [
+        181,
+        208,
+        170,
+        190,
+        72,
+        195,
+        230,
+        153
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "programUnpause",
+      "discriminator": [
+        40,
+        67,
+        64,
+        22,
+        106,
+        172,
+        128,
+        185
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
     },
     {
       "name": "settleGroupRound",
@@ -2010,46 +2050,6 @@
       "args": []
     },
     {
-      "name": "unpauseProgram",
-      "discriminator": [
-        43,
-        162,
-        233,
-        92,
-        254,
-        62,
-        69,
-        58
-      ],
-      "accounts": [
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "config",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  99,
-                  111,
-                  110,
-                  102,
-                  105,
-                  103
-                ]
-              }
-            ]
-          }
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "updateConfig",
       "discriminator": [
         29,
@@ -2427,6 +2427,60 @@
       ]
     }
   ],
+  "events": [
+    {
+      "name": "emergencyPaused",
+      "discriminator": [
+        97,
+        135,
+        220,
+        149,
+        143,
+        72,
+        9,
+        27
+      ]
+    },
+    {
+      "name": "emergencyUnpaused",
+      "discriminator": [
+        94,
+        218,
+        55,
+        35,
+        64,
+        239,
+        172,
+        36
+      ]
+    },
+    {
+      "name": "programPaused",
+      "discriminator": [
+        247,
+        9,
+        236,
+        38,
+        105,
+        35,
+        112,
+        115
+      ]
+    },
+    {
+      "name": "programUnpaused",
+      "discriminator": [
+        193,
+        183,
+        146,
+        52,
+        180,
+        17,
+        21,
+        26
+      ]
+    }
+  ],
   "errors": [
     {
       "code": 10096,
@@ -2545,8 +2599,8 @@
     },
     {
       "code": 14215,
-      "name": "alreadyActive",
-      "msg": "Program is already active"
+      "name": "notPaused",
+      "msg": "Program is not paused"
     },
     {
       "code": 14216,
@@ -2725,36 +2779,46 @@
     },
     {
       "code": 26499,
+      "name": "groupAssetAlreadyFinalizedStartPrice",
+      "msg": "Group asset has already been finalized start price of the assets"
+    },
+    {
+      "code": 26500,
       "name": "roundAlreadyCapturedStartPrice",
       "msg": "Round has already been captured all start price of the assets in the group"
     },
     {
-      "code": 26500,
+      "code": 26501,
       "name": "groupAssetNotFullyCapturedStartPrice",
       "msg": "Group asset is not fully captured start price"
     },
     {
-      "code": 26501,
+      "code": 26502,
       "name": "groupAssetNotFullyCapturedEndPrice",
       "msg": "Group asset is not fully captured end price"
     },
     {
-      "code": 26502,
+      "code": 26503,
       "name": "groupAssetAlreadyCapturedEndPrice",
       "msg": "Group asset has already been captured end price"
     },
     {
-      "code": 26503,
+      "code": 26504,
+      "name": "groupAssetAlreadyFinalizedEndPrice",
+      "msg": "Group asset has already been finalized end price"
+    },
+    {
+      "code": 26505,
       "name": "roundAlreadyCapturedEndPrice",
       "msg": "Round has already been captured all end price of the assets in the group"
     },
     {
-      "code": 26504,
+      "code": 26512,
       "name": "maxWinnerGroupIdsExceeded",
       "msg": "Max winner group ids exceeded"
     },
     {
-      "code": 26505,
+      "code": 26513,
       "name": "allBetsAlreadySettled",
       "msg": "All bets have already been settled"
     },
@@ -3072,7 +3136,7 @@
             "name": "status",
             "type": {
               "defined": {
-                "name": "contractStatus"
+                "name": "programStatus"
               }
             }
           },
@@ -3092,21 +3156,33 @@
       }
     },
     {
-      "name": "contractStatus",
-      "docs": [
-        "Enum for program status flags"
-      ],
+      "name": "emergencyPaused",
       "type": {
-        "kind": "enum",
-        "variants": [
+        "kind": "struct",
+        "fields": [
           {
-            "name": "active"
+            "name": "admin",
+            "type": "pubkey"
           },
           {
-            "name": "paused"
+            "name": "config",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "emergencyUnpaused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
           },
           {
-            "name": "emergencyPaused"
+            "name": "config",
+            "type": "pubkey"
           }
         ]
       }
@@ -3315,6 +3391,58 @@
           {
             "name": "postedSlot",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "programPaused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "config",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "programStatus",
+      "docs": [
+        "Enum for program status flags"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "active"
+          },
+          {
+            "name": "paused"
+          },
+          {
+            "name": "emergencyPaused"
+          }
+        ]
+      }
+    },
+    {
+      "name": "programUnpaused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "config",
+            "type": "pubkey"
           }
         ]
       }

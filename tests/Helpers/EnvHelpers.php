@@ -5,7 +5,7 @@ require_once __DIR__ . '/WalletHelpers.php';
 /**
  * Helpers function to manage environment variables
  */
-class Env
+class EnvHelpers
 {
     /**
      * Get enviroment variable

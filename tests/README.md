@@ -193,7 +193,7 @@ The following environment variables must be set in your `.env.testing` file:
 |----------|-------------|----------------|
 | `SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.devnet.solana.com` |
 | `PROGRAM_ID` | Your deployed program ID on devnet | `3Ut8a8pvtNBEXY3ukuQzXgHpADByembaMqeCrBiyiKXv` |
-| `TOKEN_MINT` | Your token mint address on devnet | `9mT7bBE2PEBF9Zxa7gdKEjZNwBSKSUp99paR9qqT69Ad` |
+| `TOKEN_MINT` | Your token mint address on devnet | `88gWmAHfsk7ibtkYdAofoF41JaKetQufM9L34c87h9WG` |
 
 ### For Local Network Configuration
 
