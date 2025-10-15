@@ -367,7 +367,7 @@ test('Group Round Tests', function () {
 
             // Only send if simulation is successfully
             if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
-                $sig = $conn->sendTransaction($tx, [$env->admin]);
+                $sig = $conn->sendTransaction($tx, [$env->keeper]);
                 echo "Finalize Start Group Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
                 // Wait for transaction confirmation
@@ -734,7 +734,7 @@ test('Group Round Tests', function () {
 
             // Only send if simulation is successfully
             if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
-                $sig = $conn->sendTransaction($tx, [$env->admin]);
+                $sig = $conn->sendTransaction($tx, [$env->keeper]);
                 echo "Finalize End Group Asset Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
 
                 // Wait for transaction confirmation
@@ -755,6 +755,60 @@ test('Group Round Tests', function () {
     /// -- 11. FINALIZE END GROUPS --
     // Discriminator: [135, 108, 53, 26, 184, 143, 250, 65]
 
+    // Build data
+    $finalizeEndGroupsDiscriminator = chr(135) . chr(108) . chr(53) . chr(26) . chr(184) . chr(143) . chr(250) . chr(65);
+    $finalizeEndGroupsData = $finalizeEndGroupsDiscriminator;
+
+    // Context accounts
+    $keys = [
+        new AccountMeta($env->keeper->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, false),
+        new AccountMeta($roundPda, false, true),
+        new AccountMeta($env->systemProgramId, false, false),
+    ];
+
+    // Remaining accounts
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
+    $remainingAccountsFinalizeEndGroups = [];
+    for ($groupId = 1; $groupId <= $round->totalGroups; $groupId++) {
+        $groupAssetPda = PdaHelpers::deriveGroupAssetPda($env->programId, $roundPda, $groupId);
+        $remainingAccountsFinalizeEndGroups[] = new AccountMeta($groupAssetPda, false, false);
+    }
+    $keys = array_merge($keys, $remainingAccountsFinalizeEndGroups);
+
+    // Instruction
+    $ix = new TransactionInstruction($env->programId, $keys, $finalizeEndGroupsData);
+    $tx = new Transaction();
+    $tx->feePayer = $env->keeper->getPublicKey();
+    $tx->add($ix);
+
+    try {
+        // Recent blockhash
+        $latestBlockhash = $conn->getLatestBlockhash();
+        $tx->recentBlockhash = $latestBlockhash['blockhash'];
+
+        // Simulate transaction
+        $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
+        echo "Finalize End Groups Simulation Result: " . json_encode($simResult) . "\n";
+
+        // Only send if simulation is successfully
+        if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+            $sig = $conn->sendTransaction($tx, [$env->keeper]);
+            echo "Finalize End Groups Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
+        } else {
+            throw new Exception('Finalize End Groups simulation failed: ' . json_encode($simResult['value']['err']));
+        }
+
+        expect(is_string($sig))->toBeTrue();
+        expect(strlen($sig))->toBeGreaterThan(10);
+    } catch (Exception $e) {
+        echo "Finalize End Groups Error: " . $e->getMessage() . "\n";
+        echo "Error Class: " . get_class($e) . "\n";
+        throw $e;
+    }
 
     /// -- 12. SETTLE ROUND --
     // Discriminator: [117, 63, 7, 4, 247, 239, 50, 135]

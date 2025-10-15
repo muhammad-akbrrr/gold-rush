@@ -310,8 +310,6 @@ test('Single Asset Round Tests', function () {
     // Retry configuration
     $maxWaitMs = 40_000; // 40 seconds
     $pollIntervalMs = 1_000; // 1 second
-    $maxRetries = 40;
-    $retryCount = 0;
     $startTime = microtime(true) * 1_000;
 
     // Retry loop for RoundNotReadyForSettle
