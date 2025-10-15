@@ -903,4 +903,60 @@ test('Group Round Tests', function () {
 
     /// -- 13. CLAIM REWARD --
     // Discriminator: [149, 95, 181, 242, 94, 90, 158, 162]
+
+    // Build data
+    $claimRewardDiscriminator = chr(149) . chr(95) . chr(181) . chr(242) . chr(94) . chr(90) . chr(158) . chr(162);
+    $claimRewardData = $claimRewardDiscriminator;
+
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
+    for ($betId = 1; $betId <= $round->totalBets; $betId++) {
+        $betPda = PdaHelpers::deriveBetPda($env->programId, $roundPda, $betId);
+
+        // Context accounts
+        $keys = [
+            new AccountMeta($env->user->getPublicKey(), true, true),
+            new AccountMeta($configPda, false, false),
+            new AccountMeta($roundPda, false, false),
+            new AccountMeta($vaultPda, false, true),
+            new AccountMeta($betPda, false, true),
+            new AccountMeta($userTokenAccount, false, true),
+            new AccountMeta($env->mint, false, false),
+            new AccountMeta($env->tokenProgramId, false, false),
+            new AccountMeta($env->systemProgramId, false, false),
+        ];
+
+        // Instruction
+        $ix = new TransactionInstruction($env->programId, $keys, $claimRewardData);
+        $tx = new Transaction();
+        $tx->feePayer = $env->user->getPublicKey();
+        $tx->add($ix);
+
+        try {
+            // Recent blockhash
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
+
+            // Simulate transaction
+            $simResult = $conn->simulateTransaction($tx, [$env->user]);
+            echo "Claim Reward Simulation Result: " . json_encode($simResult) . "\n";
+
+            // Only send if simulation is successfully
+            if (!isset($simResult['value']['err']) || $simResult['value']['err'] === null) {
+                $sig = $conn->sendTransaction($tx, [$env->user]);
+                echo "Claim Reward Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+                // Wait for transaction confirmation
+                TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
+            } else {
+                throw new Exception('Claim Reward Simulation failed: ' . json_encode($simResult['value']['err']));
+            }
+
+            expect(is_string($sig))->toBeTrue();
+            expect(strlen($sig))->toBeGreaterThan(10);
+        } catch (Exception $e) {
+            echo "Claim Reward Error: " . $e->getMessage() . "\n";
+            echo "Error Class: " . get_class($e) . "\n";
+            throw $e;
+        }
+    }
 })->group('solana');
