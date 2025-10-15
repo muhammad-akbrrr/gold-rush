@@ -312,7 +312,7 @@ test('Single Asset Round Tests', function () {
     $pollIntervalMs = 1_000; // 1 second
     $startTime = microtime(true) * 1_000;
 
-    // Retry loop for RoundNotReadyForSettle
+    // Retry loop for RoundNotReadyForSettlement
     while (true) {
         try {
             // Recent blockhash
@@ -329,13 +329,13 @@ test('Single Asset Round Tests', function () {
                 $logs = $simResult['value']['logs'] ?? [];
                 $logsString = implode(' ', $logs);
 
-                // Check for RoundNotReadyForSettle in logs
-                if (strpos($logsString, 'RoundNotReadyForSettle') !== false) {
+                // Check for RoundNotReadyForSettlement in logs
+                if (strpos($logsString, 'RoundNotReadyForSettlement') !== false) {
                     $currentTime = microtime(true) * 1_000;
                     if ($currentTime - $startTime > $maxWaitMs) {
-                        throw new Exception('Timed out waiting for round to be ready after ' . ($maxWaitMs / 1_000) . ' seconds');
+                        throw new Exception('Timed out waiting for round to be ready settle after ' . ($maxWaitMs / 1_000) . ' seconds');
                     }
-                    echo "RoundNotReadyForSettle detected in logs, waiting {$pollIntervalMs}ms...\n";
+                    echo "RoundNotReadyForSettlement detected in logs, waiting {$pollIntervalMs}ms...\n";
                     usleep($pollIntervalMs * 1_000);
                     continue;
                 }

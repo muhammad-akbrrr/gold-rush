@@ -812,4 +812,95 @@ test('Group Round Tests', function () {
 
     /// -- 12. SETTLE ROUND --
     // Discriminator: [117, 63, 7, 4, 247, 239, 50, 135]
+
+    // Build data
+    $settleRoundDiscriminator = chr(117) . chr(63) . chr(7) . chr(4) . chr(247) . chr(239) . chr(50) . chr(135);
+    $settleRoundData = $settleRoundDiscriminator;
+
+    // Context accounts
+    $keys = [
+        new AccountMeta($env->keeper->getPublicKey(), true, true),
+        new AccountMeta($configPda, false, false),
+        new AccountMeta($roundPda, false, true),
+        new AccountMeta($vaultPda, false, true),
+        new AccountMeta($env->treasury->getPublicKey(), false, false),
+        new AccountMeta($treasuryTokenAccount, false, true),
+        new AccountMeta($env->mint, false, false),
+        new AccountMeta($env->tokenProgramId, false, false),
+        new AccountMeta($env->associatedTokenProgramId, false, false),
+        new AccountMeta($env->systemProgramId, false, false),
+    ];
+
+    // Remaining accounts
+    $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
+    $remainingAccountsSettleRound = [];
+    for ($betId = 1; $betId <= $round->totalBets; $betId++) {
+        $betPda = PdaHelpers::deriveBetPda($env->programId, $roundPda, $betId);
+        $remainingAccountsSettleRound[] = new AccountMeta($betPda, false, true);
+    }
+    $keys = array_merge($keys, $remainingAccountsSettleRound);
+
+    // Instruction
+    $ix = new TransactionInstruction($env->programId, $keys, $settleRoundData);
+    $tx = new Transaction();
+    $tx->feePayer = $env->keeper->getPublicKey();
+    $tx->add($ix);
+
+    // Retry configuration
+    $maxWaitMs = 80_000; // 80 seconds
+    $pollIntervalMs = 1_000; // 1 second
+    $startTime = microtime(true) * 1_000;
+
+    // Retry loop for RoundNotReadyForSettlement
+    while (true) {
+        try {
+            // Recent blockhash
+            $latestBlockhash = $conn->getLatestBlockhash();
+            $tx->recentBlockhash = $latestBlockhash['blockhash'];
+
+            // Simulate transaction
+            $simResult = $conn->simulateTransaction($tx, [$env->keeper]);
+            echo "Settle Round Simulation Result: " . json_encode($simResult) . "\n";
+
+            // Check for specific errors in simulation
+            if (isset($simResult['value']['err']) && $simResult['value']['err'] !== null) {
+                // Check logs for specific error messages
+                $logs = $simResult['value']['logs'] ?? [];
+                $logsString = implode(' ', $logs);
+
+                // Check for RoundNotReadyForSettlement in logs
+                if (strpos($logsString, 'RoundNotReadyForSettlement') !== false) {
+                    $currentTime = microtime(true) * 1_000;
+                    if ($currentTime - $startTime > $maxWaitMs) {
+                        throw new Exception('Timed out waiting for round to be ready settle after ' . ($maxWaitMs / 1_000) . ' seconds');
+                    }
+                    echo "RoundNotReadyForSettlement detected in logs, waiting {$pollIntervalMs}ms...\n";
+                    usleep($pollIntervalMs * 1_000);
+                    continue;
+                }
+
+                // If not a retryable error, throw it
+                throw new Exception('Settle Round simulation failed: ' . json_encode($simResult['value']['err']));
+            }
+
+            // If simulation successful, send transaction
+            $sig = $conn->sendTransaction($tx, [$env->keeper]);
+            echo "Settle Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
+            expect(is_string($sig))->toBeTrue();
+            expect(strlen($sig))->toBeGreaterThan(10);
+
+            // Wait for transaction confirmation
+            TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
+
+            break;
+        } catch (Exception $e) {
+            echo "Settle Round Error: " . $e->getMessage() . "\n";
+            echo "Error Class: " . get_class($e) . "\n";
+            throw $e;
+        }
+    }
+
+    /// -- 13. CLAIM REWARD --
+    // Discriminator: [149, 95, 181, 242, 94, 90, 158, 162]
 })->group('solana');
