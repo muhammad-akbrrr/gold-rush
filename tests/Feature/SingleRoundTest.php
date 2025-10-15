@@ -53,10 +53,7 @@ test('Single Asset Round Tests', function () {
     $config = AccountHelpers::fetchConfigAccount($client, $configPda);
     $currentRoundId = $config->currentRoundCounter;
     $nextRoundId = $currentRoundId + 1;
-
-    // Debug current round info
-    echo "Current Round ID: " . $currentRoundId . "\n";
-    echo "Next Round ID: " . $nextRoundId . "\n";
+    echo "Round ID: " . $nextRoundId . "\n";
 
     // Derive round PDA
     $roundPda = PdaHelpers::deriveRoundPda($env->programId, $nextRoundId);
@@ -112,6 +109,7 @@ test('Single Asset Round Tests', function () {
         } else {
             throw new Exception('Create Round simulation failed: ' . json_encode($simResult['value']['err']));
         }
+
         expect(is_string($sig))->toBeTrue();
         expect(strlen($sig))->toBeGreaterThan(10);
     } catch (Exception $e) {
@@ -145,11 +143,9 @@ test('Single Asset Round Tests', function () {
     // Retry configuration
     $maxWaitMs = 20_000; // 20 seconds
     $pollIntervalMs = 1_000; // 1 second
-    $maxRetries = 20;
-    $retryCount = 0;
     $startTime = microtime(true) * 1_000;
 
-    // Retry loop for PythError and RoundNotReadyForStart
+    // Retry loop for RoundNotReadyForStart
     while (true) {
         try {
             // Recent blockhash
@@ -166,17 +162,6 @@ test('Single Asset Round Tests', function () {
                 $logs = $simResult['value']['logs'] ?? [];
                 $logsString = implode(' ', $logs);
 
-                // Check for PythError in logs
-                if (strpos($logsString, 'PythError') !== false) {
-                    $retryCount++;
-                    if ($retryCount >= $maxRetries) {
-                        throw new Exception('Timed out waiting for pyth error to resolve after ' . $maxRetries . ' attempts');
-                    }
-                    echo "PythError detected in logs (attempt {$retryCount}/{$maxRetries}), waiting {$pollIntervalMs}ms...\n";
-                    usleep($pollIntervalMs * 1_000);
-                    continue;
-                }
-
                 // Check for RoundNotReadyForStart in logs
                 if (strpos($logsString, 'RoundNotReadyForStart') !== false) {
                     $currentTime = microtime(true) * 1_000;
@@ -192,16 +177,16 @@ test('Single Asset Round Tests', function () {
                 throw new Exception('Start Round simulation failed: ' . json_encode($simResult['value']['err']));
             }
 
-            // If simulation successful, send transaction
+            // Send transaction
             $sig = $conn->sendTransaction($tx, [$env->keeper]);
             echo "Start Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
             expect(is_string($sig))->toBeTrue();
             expect(strlen($sig))->toBeGreaterThan(10);
 
             // Wait for Start Round to complete and verify status change
             TxHelpers::confirmTransaction($client, $sig, $latestBlockhash['lastValidBlockHeight']);
 
-            // Success! Break out of retry loop
             break;
         } catch (Exception $e) {
             echo "Start Round Error: " . $e->getMessage() . "\n";
@@ -364,6 +349,7 @@ test('Single Asset Round Tests', function () {
             // If simulation successful, send transaction
             $sig = $conn->sendTransaction($tx, [$env->keeper]);
             echo "Settle Round Transaction: " . UrlHelpers::getFullExplorerUrl($env->rpcUrl, 'tx', $sig) . "\n";
+
             expect(is_string($sig))->toBeTrue();
             expect(strlen($sig))->toBeGreaterThan(10);
 
