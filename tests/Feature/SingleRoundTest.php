@@ -273,7 +273,16 @@ test('Single Asset Round Tests', function () {
         throw $e;
     }
 
+    /*
+     * NOTE: Steps 4 and 5 are commented out per developer's workflow.
+     * These operations should be handled by the Rust keeper bots:
+     * - cargo run -p keepers --bin settle_round
+     *
+     * To test settlement in Laravel, uncomment the code below.
+     */
+
     /// -- 4. SETTLE SINGLE ROUND --
+    /*
     // Discriminator: [136, 196, 251, 236, 219, 255, 108, 43]
 
     // Build data
@@ -416,4 +425,5 @@ test('Single Asset Round Tests', function () {
         echo "Error Class: " . get_class($e) . "\n";
         throw $e;
     }
+    */
 })->group('solana');

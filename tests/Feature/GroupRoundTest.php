@@ -590,7 +590,16 @@ test('Group Round Tests', function () {
         throw $e;
     }
 
+    /*
+     * NOTE: Steps 9-13 are commented out per developer's workflow.
+     * These operations should be handled by the Rust keeper bots:
+     * - cargo run -p keepers --bin settle_round
+     *
+     * To test settlement in Laravel, uncomment the code below.
+     */
+
     /// -- 9. CAPTURE END PRICE --
+    /*
     // Discriminator: [116, 44, 170, 74, 105, 109, 182, 246]
 
     $round = AccountHelpers::fetchRoundAccount($client, $roundPda);
@@ -959,4 +968,5 @@ test('Group Round Tests', function () {
             throw $e;
         }
     }
+    */
 })->group('solana');

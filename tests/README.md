@@ -2,10 +2,75 @@
 
 This directory contains helper functions extracted from Solana tests to make testing more modular and reusable.
 
+## Quick Start - Recommended Workflow
+
+**IMPORTANT:** The Laravel integration tests create rounds and place bets, but settlement is handled by separate Rust keeper bots. This mimics the production architecture where keepers run as automated services.
+
+### Step 1: Setup Environment
+
+```bash
+# 1. Copy the example environment file
+cp .env.testing.example .env.testing
+
+# 2. Ensure wallet files are in tests/Wallets/
+# - 1.json (admin/keeper/treasury wallet)
+# - 2.json (user wallet)
+```
+
+### Step 2: Run Laravel Integration Tests (Create Rounds & Place Bets)
+
+**Single Asset Betting:**
+```bash
+php artisan test --filter=SingleRoundTest
+```
+This will:
+- Create a new betting round
+- Start the round at the scheduled time
+- Place a bet from the user
+
+**Group Battle Betting:**
+```bash
+php artisan test --filter=GroupRoundTest
+```
+This will:
+- Create a group battle round
+- Insert groups and assets
+- Capture starting prices
+- Start the round
+- Place a bet
+
+### Step 3: Run Rust Keeper Bots (Settle Rounds)
+
+After creating rounds with the Laravel tests, the keeper bots handle settlement:
+
+**Start a keeper bot for settling rounds:**
+```bash
+# In your Rust keeper project directory
+cargo run -p keepers --bin settle_round
+```
+
+This keeper bot will:
+- Monitor for rounds that have ended
+- Capture final prices from Pyth oracles
+- Settle all bets (determine winners/losers)
+- Distribute treasury fees
+- Run every 3 minutes by default (configurable via `SETTLE_ROUND_PERIOD_IN_SECS` in `.env`)
+
+### Step 4: Claim Rewards (Optional)
+
+Winners can claim their rewards through the web UI or by running a claim transaction manually.
+
+---
+
+## Alternative: Full End-to-End Testing in Laravel
+
+If you want to test the complete lifecycle (including settlement) within Laravel tests, you can uncomment steps 4-5 in `SingleRoundTest.php` and steps 9-13 in `GroupRoundTest.php`. However, note that you'll need to adjust timing to ensure rounds have fully ended before settlement.
+
+---
 
 ## How to Run Tests
 
-### Quick Start Guide
+### Quick Start Guide (Legacy - Full E2E in Laravel)
 
 Choose one of the following options based on your preference:
 
@@ -15,7 +80,7 @@ Choose one of the following options based on your preference:
 # 1. Copy the example environment file
 cp .env.testing.example .env.testing
 
-# 2. Run the test
+# 2. Run the test (creates round, starts, bets - settlement via keeper bot)
 php artisan test --filter=SingleRoundTest
 ```
 
